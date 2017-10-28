@@ -40,7 +40,7 @@ It is a javascript lib which not only defines some useful methods and constructo
     - Config
     - send
     - parseURL
-    - joinParam
+    - joinParams
 - Script
     - includePath
     - loadOne
