@@ -4,7 +4,7 @@
 
 ## What's Hit.js?
 
-It is a javascript lib which not only defines some useful methods and constructors but also contains some polyfills and shims. In addition, it has detailed comments, so you can just read the file and find out what it can do.
+It is a javascript lib which not only defines some useful methods and constructors but also contains some polyfills and shims. In addition, it has detailed comments so that you can just read the file and find out what it can do.
 
 ### Some constructors in Hit.js:
 
