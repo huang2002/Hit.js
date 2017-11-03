@@ -334,6 +334,24 @@ Sequence.create = function(delay, callback) {
 
 //#region - fix
 
+// fix functions
+Function.prototype.apply = (function(apply) {
+    return function(thisArg, args) {
+        switch (args.length) {
+            case 0:
+                return this.call(thisArg);
+            case 1:
+                return this.call(thisArg, args[0]);
+            case 2:
+                return this.call(thisArg, args[0], args[1]);
+            case 3:
+                return this.call(thisArg, args[0], args[1], args[2]);
+            default:
+                return apply.call(this, args);
+        }
+    };
+})(Function.prototype.apply);
+
 // fix Array
 if (!('from' in Array)) {
     Array.from = function(arrayLike) {
@@ -533,32 +551,14 @@ if (!('resolve' in Promise)) {
 
 }
 
-// fix functions
-Function.prototype.apply = (function(apply) {
-    return function(thisArg, args) {
-        switch (args.length) {
-            case 0:
-                return this.call(thisArg);
-            case 1:
-                return this.call(thisArg, args[0]);
-            case 2:
-                return this.call(thisArg, args[0], args[1]);
-            case 3:
-                return this.call(thisArg, args[0], args[1], args[2]);
-            default:
-                return apply.call(this, args);
-        }
-    };
-})(Function.prototype.apply);
-
 // fix setImmediate
 if (!('setImmediate' in window)) {
     window.setImmediate = function(handler) {
         var args = Array.from(arguments);
         args.splice(1, 0, 0);
-        return setTimeout.apply(window, args);
+        return setTimeout.apply(this, args);
     };
-    window.clearImmediate = window.clearImmediate;
+    window.clearImmediate = window.clearTimeout;
 }
 
 // fix requestAnimationFrame
@@ -1991,7 +1991,7 @@ var Extension = (function() {
                             requirements[i] = exportations[need[i]];
                         }
                     }
-                    callback.apply(null, requirements);
+                    setImmediate.apply(window, [callback].concat(requirements));
                     return true;
                 });
                 return false;
