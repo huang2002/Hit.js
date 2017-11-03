@@ -1,5 +1,6 @@
 /**
  * @file Hit.js
+ * @see https://github.com/huang2002/Hit.js
  * @author hhh
  */
 
