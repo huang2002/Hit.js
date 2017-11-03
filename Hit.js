@@ -508,29 +508,29 @@ if (!('Promise' in window)) {
             }, 0);
         }
     };
-} else {
-    if (!('done' in Promise.prototype)) {
-        Promise.prototype.done = function(onfulfilled, onrejected) {
-            this.then(onfulfilled, onrejected)
-                .catch(function(err) {
-                    throw err;
-                });
-        };
-    }
-    if (!('reject' in Promise)) {
-        Promise.reject = function(reason) {
-            return new Promise(function(resolve, reject) {
-                reject(reason);
+}
+if (!('done' in Promise.prototype)) {
+    Promise.prototype.done = function(onfulfilled, onrejected) {
+        this.then(onfulfilled, onrejected)
+            .catch(function(err) {
+                throw err;
             });
-        };
-    }
-    if (!('resolve' in Promise)) {
-        Promise.resolve = function(data) {
-            return new Promise(function(resolve, reject) {
-                resolve(data);
-            });
-        };
-    }
+    };
+}
+if (!('reject' in Promise)) {
+    Promise.reject = function(reason) {
+        return new Promise(function(resolve, reject) {
+            reject(reason);
+        });
+    };
+}
+if (!('resolve' in Promise)) {
+    Promise.resolve = function(data) {
+        return new Promise(function(resolve, reject) {
+            resolve(data);
+        });
+    };
+
 }
 
 // fix functions
@@ -553,8 +553,20 @@ Function.prototype.apply = (function(apply) {
 
 // fix setImmediate
 if (!('setImmediate' in window)) {
-    window.setImmediate = window.setTimeout;
+    window.setImmediate = function(handler) {
+        var args = Array.from(arguments);
+        args.splice(1, 0, 0);
+        return setTimeout.apply(window, args);
+    };
     window.clearImmediate = window.clearImmediate;
+}
+
+// fix requestAnimationFrame
+if (!('requestAnimationFrame') in window) {
+    window.requestAnimationFrame = function(handler) {
+        return setTimeout(handler, 15);
+    };
+    window.cancelAnimationFrame = window.clearTimeout;
 }
 
 //#endregion
@@ -1099,9 +1111,12 @@ var Ani = {
             agency.trigger('update', +new Date());
             var endTime = +new Date();
             lastFrameDuration = endTime - startTime;
-            setTimeout(run, Math.max(0, 1000 / this.fps - lastFrameDuration));
+            setTimeout(this.usingRAF ? function() {
+                requestAnimationFrame(run);
+            } : run, Math.max(0, 1000 / this.fps - lastFrameDuration));
         }.bind(this);
-        this.fps = 40;
+        this.fps = 50;
+        this.usingRAF = true;
         this.start = function() {
             isRunning = true;
             agency.trigger('start', +new Date());
@@ -1153,8 +1168,85 @@ var Ani = {
         var frame = new Ani.Frame();
         frame.fps = fps;
         return frame.listen('start', updater).start();
+    },
+    /**
+     * @description The accuracy of cubic timing functions.
+     * @type {number} The accuracy.
+     */
+    cubicAccuracy: .006,
+    /**
+     * @description To create a timing function of cubic(x0, y0, x1, y2).
+     * @param {number} x0 x0.
+     * @param {number} y0 y0.
+     * @param {number} x1 x1.
+     * @param {number} y1 y1.
+     * @returns {(at: number) => number} The timing function.
+     */
+    cubic: function(x0, y0, x1, y1) {
+        var limit = Ani.cubicAccuracy;
+        if (x0 > 1) {
+            x0 = 1;
+        } else if (x0 < 0) {
+            x0 = 0;
+        }
+        if (x1 > 1) {
+            x1 = 1;
+        } else if (x1 < 0) {
+            x1 = 0;
+        }
+        var calc = function(t) {
+            var x = [0, x0, x1, 1],
+                y = [0, y0, y1, 1],
+                c = 3;
+            while (c > 0) {
+                var _x = [],
+                    _y = [];
+                for (var i = 0; i < c; i++) {
+                    _x[i] = x[i] + (x[i + 1] - x[i]) * t;
+                    _y[i] = y[i] + (y[i + 1] - y[i]) * t;
+                }
+                x = _x;
+                y = _y;
+                c--;
+            }
+            return {
+                x: x[0],
+                y: y[0]
+            };
+        };
+        var find = function(x, left, right) {
+            var mid = (left + right) / 2,
+                ans = calc(mid);
+            if (Math.abs(ans.x - x) <= limit) {
+                return ans.y;
+            } else if (ans.x > x) {
+                return find(x, left, mid);
+            } else {
+                return find(x, mid, right);
+            }
+        };
+        return function(at) {
+            return find(at, 0, 1);
+        };
+    },
+    /**
+     * @description The timing function of animations.
+     * @param {number} at (now - start) / dur
+     * @returns {number} The value.
+     */
+    linear: function(at) {
+        return at;
     }
 };
+// other timing functions
+Loop.each({
+    ease: Ani.cubic(.25, 1, .25, 1),
+    easeIn: Ani.cubic(.42, 0, 1, 1),
+    easeOut: Ani.cubic(0, 0, .58, 1),
+    easeInOut: Ani.cubic(.42, 0, .58, 1)
+}, function(v, k) {
+    Ani[k] = v;
+});
 
 //#region - extend elements
 /**
@@ -1371,7 +1463,7 @@ Element.prototype.val = function(val) {
 };
 /**
  * @description To create an animation of the element. (Will start the animation immediately.)
- * @param {{style: string, from: number, to: number, dur: number, fps: number, unit: string}} config The config.
+ * @param {{style: string, from: number, to: number, dur: number, fps: number, unit: string, fn: (at: number) => number}} config The config.
  * @returns {Ani.Frame} The animation.
  */
 Element.prototype.ani = function(config) {
@@ -1384,6 +1476,7 @@ Element.prototype.ani = function(config) {
         fps = config.fps,
         style = config.style,
         numReg = /^-?\d*\.?\d+/g,
+        fn = config.fn,
         startTime = +new Date();
     if (from == undefined) {
         from = this.style[style] || 0;
@@ -1404,9 +1497,12 @@ Element.prototype.ani = function(config) {
     if (typeof unit !== 'string') {
         unit = ((config.to || '') + '').slice(to.length);
     }
+    if (!(fn instanceof Function)) {
+        fn = Ani.linear;
+    }
     frame.fps = 40;
     frame.listen('update', function(now) {
-        ele.style[style] = Math.med(from, from + (to - from) * ((now - startTime) / dur), to) + unit;
+        ele.style[style] = Math.med(from, from + (to - from) * fn((now - startTime) / dur), to) + unit;
     });
     frame.listen('stop', function() {
         ele.style[style] = to + unit;
@@ -1419,41 +1515,47 @@ Element.prototype.ani = function(config) {
 };
 /**
  * @description To let the element fade out.
- * @param {{dur: number, fps: number}} config The config.
+ * @param {{dur: number, fps: number, fn: (at: number) => number}} config The config.
  * @returns {Element} Self.
  */
 Element.prototype.fadeOut = function(config) {
+    var ele = this;
     config = config || {};
     return this.ani({
         style: 'opacity',
+        from: config.from || 1,
         to: 0,
         unit: '',
         fps: config.fps || 32,
-        dur: config.dur || 1000
-    }).listen('stop', this.hide);
+        dur: config.dur || 1000,
+        fn: config.fn
+    }).listen('stop', function() {
+        ele.hide();
+    });
 };
 /**
  * @description To let the element fade in.
- * @param {{dur: number, fps: number, display: string}} config The config.
+ * @param {{dur: number, fps: number, display: string, fn: (at: number) => number}} config The config.
  * @returns {Element} Self.
  */
 Element.prototype.fadeIn = function(config) {
     var ele = this;
     config = config || {};
+    ele.show(config.display || 'block');
     return this.ani({
         style: 'opacity',
+        from: config.from || 0,
         to: 1,
         unit: '',
         fps: config.fps || 32,
-        dur: config.dur || 1000
-    }).listen('stop', function() {
-        ele.show(config.display || 'block');
+        dur: config.dur || 1000,
+        fn: config.fn
     });
 };
 // extend elements, documents and windows.
 Loop.each([
     Element,
-    HTMLDocument,
+    Document,
     Window
 ], function(O) {
     /**
