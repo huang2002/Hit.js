@@ -35,6 +35,12 @@ It is a javascript lib which not only defines some useful methods and constructo
 - Ani
     - Frame
     - create
+    - cubic
+    - linear
+    - ease
+    - easeIn
+    - easeOut
+    - easeInOut
 - Ajax
     - Result
     - Config
