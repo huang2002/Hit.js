@@ -917,6 +917,28 @@ Loop.each({
         return a * k + b * (1 - k);
     },
     /**
+     * @description To cut the decimal part.
+     * @param {number} num The number.
+     * @param {number} len The target length of the decimal part. (Default value is 0.)
+     * @returns {number} The result.
+     */
+    cut: function(num, len) {
+        if (typeof num !== 'number') {
+            return NaN;
+        }
+        if (!(len >= 0)) {
+            len = 0;
+        }
+        num = num + '';
+        var index = num.indexOf('.');
+        if (index !== -1) {
+            num = num.split('');
+            num.splice(index + len + 1);
+            num = num.join('');
+        }
+        return num - 0;
+    },
+    /**
      * @description To calculate the distance between (x0, y0) and (x1, y1).
      * @param {number} x0 The x of the first point.
      * @param {number} y0 The y of the first point.
@@ -961,7 +983,6 @@ Loop.each({
 }, function(ext, key) {
     Math[key] = ext;
 });
-
 
 /** @description This object has some methods or constructors about DOM. */
 var DOM = {
@@ -1115,7 +1136,7 @@ var Ani = {
                 requestAnimationFrame(run);
             } : run, Math.max(0, 1000 / this.fps - lastFrameDuration));
         }.bind(this);
-        this.fps = 50;
+        this.fps = 40;
         this.usingRAF = true;
         this.start = function() {
             isRunning = true;
@@ -1236,6 +1257,15 @@ var Ani = {
      */
     linear: function(at) {
         return at;
+    },
+    steps: function(count, start) {
+        start = start || false;
+        var gap = 1 / count;
+        return start ? function(at) {
+            return Math.ceil(at / gap) * gap;
+        } : function(at) {
+            return Math.floor(at / gap) * gap;
+        };
     }
 };
 // other timing functions
@@ -1463,7 +1493,7 @@ Element.prototype.val = function(val) {
 };
 /**
  * @description To create an animation of the element. (Will start the animation immediately.)
- * @param {{style: string, from: number, to: number, dur: number, fps: number, unit: string, fn: (at: number) => number}} config The config.
+ * @param {{style: string, from: number, to: number, dur: number, fps: number, unit: string, fn: (at: number) => number, transferer: (value: any) => any}} config The config.
  * @returns {Ani.Frame} The animation.
  */
 Element.prototype.ani = function(config) {
@@ -1472,11 +1502,12 @@ Element.prototype.ani = function(config) {
         from = config.from,
         to = config.to,
         dur = config.dur,
-        unit = config.unit,
+        unit = 'unit' in config ? config.unit : 'px',
         fps = config.fps,
         style = config.style,
         numReg = /^-?\d*\.?\d+/g,
         fn = config.fn,
+        transferer = config.transferer || false,
         startTime = +new Date();
     if (from == undefined) {
         from = this.style[style] || 0;
@@ -1494,15 +1525,16 @@ Element.prototype.ani = function(config) {
     if (typeof fps !== 'number') {
         fps = 40;
     }
-    if (typeof unit !== 'string') {
-        unit = ((config.to || '') + '').slice(to.length);
-    }
     if (!(fn instanceof Function)) {
         fn = Ani.linear;
     }
-    frame.fps = 40;
+    frame.fps = 50;
     frame.listen('update', function(now) {
-        ele.style[style] = Math.med(from, from + (to - from) * fn((now - startTime) / dur), to) + unit;
+        var value = Math.med(from, from + (to - from) * fn((now - startTime) / dur), to) + unit;
+        if (transferer) {
+            value = transferer(value);
+        }
+        ele.style[style] = value;
     });
     frame.listen('stop', function() {
         ele.style[style] = to + unit;

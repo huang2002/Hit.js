@@ -88,6 +88,7 @@ It is a javascript lib which not only defines some useful methods and constructo
     - mid
     - med
     - mix
+    - cut
     - distance
     - distance_p
     - distance3d
