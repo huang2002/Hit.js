@@ -1,0 +1,53 @@
+/**
+ * @file Hit.range.css
+ * @see https://github.com/huang2002/Hit.js
+ * @author hhh
+ */
+
+.range,
+.range * {
+    margin: 0;
+    padding: 0;
+    box-sizing: content-box;
+    overflow: visible;
+}
+
+.range {
+    display: inline-block;
+    margin: 0 .5em;
+    width: 8em;
+    height: 1em;
+    background: #fff;
+    border: solid 1px #555;
+    border-radius: 99em;
+}
+
+.range:hover {
+    border-color: #222;
+}
+
+.range-inner {
+    display: inline-block;
+    height: 100%;
+    background: #bef;
+    border-radius: 99em;
+    transform: translateY(-1px);
+}
+
+.range-thumb {
+    box-sizing: border-box;
+    margin-bottom: 1px;
+    height: 1em;
+    width: 1em;
+    background: #eee;
+    background: radial-gradient(#f9f9f9, #ccc);
+    border: solid 1px #333;
+    border-radius: 99em;
+    transform-origin: center;
+    transform: scale(1.3);
+    cursor: move;
+}
+
+.range-thumb:hover {
+    border-color: #000;
+}

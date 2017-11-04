@@ -570,6 +570,18 @@ if (!('requestAnimationFrame') in window) {
     window.cancelAnimationFrame = window.clearTimeout;
 }
 
+// fix Event
+if (!('preventDefault' in Event.prototype)) {
+    Event.prototype.preventDefault = function() {
+        this.returnValue = false;
+    };
+}
+if (!('stopPropagation' in Event.prototype)) {
+    Event.prototype.stopPropagation = function() {
+        this.bubbles = false;
+    };
+}
+
 //#endregion
 
 //#region - define ChainNode&Chain
@@ -633,6 +645,20 @@ var ChainNode = new Constructor(function(value) {
         }
         node.next = this;
         return node;
+    },
+    /**
+     * @description To remove the node.
+     * @returns {undefined} No return value.
+     */
+    remove: function() {
+        if (this.prev) {
+            this.prev.next = null;
+            this.prev = null;
+        }
+        if (this.next) {
+            this.next.prev = null;
+            this.next = null;
+        }
     }
 });
 /**
@@ -736,6 +762,17 @@ var Chain = new Constructor(function(initialVal) {
             this.pointer = this.pointer.next;
         }
         return this.pointer;
+    },
+    /**
+     * @description To abandon the last node.
+     * @returns {Chain} Self.
+     */
+    abandon: function() {
+        if (this.tail) {
+            this.tail.prev.next = null;
+            this.tail = this.tail.prev;
+        }
+        return this;
     }
 });
 /**
@@ -989,25 +1026,29 @@ Loop.each({
 var DOM = {
     /**
      * @description To create an element by abbr.
-     * @param {string} abbr The abbr of the element.
+     * @param {string} str The abbr of the element.
      * @returns {Element} The element.
      */
-    create: function(abbr) {
+    create: function(str) {
         try {
-            var str = abbr;
-            str = str.split('#');
-            var ele = document.createElement(str[0]);
-            str = str[1];
-            if (str) {
-                var index = str.indexOf('.'),
-                    id = str;
-                if (index !== -1) {
-                    str.split('').slice(index + 1).join('').split('.').forEach(function(c) {
-                        ele.addClass(c);
-                    });
-                    id = str.split('').slice(0, index).join('');
-                }
-                ele.id = id;
+            var tag = str.match(/^[\w\-]+/)[0],
+                ele = document.createElement(tag),
+                index = null,
+                arr = null;
+            str = str.slice(tag.length);
+            index = str.indexOf('{');
+            if (index !== -1) {
+                ele.html(str.slice(index + 1, str.lastIndexOf('}')));
+                str = str.slice(0, index);
+            }
+            index = str.indexOf('.');
+            if (index !== -1) {
+                arr = str.split('.');
+                str = arr.shift();
+                Loop.each(arr, ele.addClass, ele);
+            }
+            if (str.match(/^#/)) {
+                ele.id = str.slice(1);
             }
             return ele;
         } catch (err) {
@@ -1047,6 +1088,10 @@ var DOM = {
     // Equals to document.on('ready', $listener, $useCapture).
     ready: function(listener, useCapture) {
         return document.on('ready', listener, useCapture);
+    },
+    // Equals to window.listen('load', $listener, $useCapture).
+    load: function(listener, useCapture) {
+        return window.listen('load', listener, useCapture);
     },
     /**
      * @description Custom events.
@@ -1448,7 +1493,7 @@ Element.prototype.scroll = function(offsetX, offsetY) {
  * @returns {Element} Self.
  */
 Element.prototype.insertTo = function(index, parent) {
-    [].splice.call(parent.children, index, 0, this);
+    parent.insertBefore(this, parent.children[index]);
     return this;
 };
 /**
@@ -1458,7 +1503,7 @@ Element.prototype.insertTo = function(index, parent) {
  * @returns {Element} Self.
  */
 Element.prototype.insertChild = function(index, child) {
-    [].splice.call(this.children, index, 0, child);
+    this.insertBefore(child, this.children[index]);
     return this;
 };
 /**

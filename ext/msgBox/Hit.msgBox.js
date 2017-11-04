@@ -29,7 +29,7 @@ DOM.ready(function() {
         /**
          * @description The main method which displays the message.
          * @param {string} msg The message.
-         * @param {number} timeout The time before hiding the box automatically.
+         * @param {number} timeout The time before hiding the box automatically. If the value is not given, the message box will be closed only by clicking the close button.
          * @returns {undefined} No return value.
          */
         return function(msg, timeout) {
