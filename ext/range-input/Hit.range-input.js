@@ -16,13 +16,15 @@ DOM.load(function() {
             inner = DOM.create('dib.range-inner').appendTo(outer),
             thumb = DOM.create('div.range-thumb').appendTo(inner);
         var isActive = false;
-        var startInput = function() {
+        var startInput = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             input.trigger('focus');
             isActive = true;
         };
         var stopInput = function() {
-            input.trigger('blur');
             isActive = false;
+            input.trigger('blur');
         };
         var inputValue = function(e) {
             if (!isActive) {
@@ -30,9 +32,6 @@ DOM.load(function() {
             }
             e.preventDefault();
             e.stopPropagation();
-            if ('touches' in e) {
-                e = e.touches[0];
-            }
             var min = (input.min - 0) || 0,
                 max = input.max !== '' ? (input.max - 0) : 100,
                 step = (input.step - 0) || 1,
@@ -40,18 +39,20 @@ DOM.load(function() {
                 or = outer.getBoundingClientRect(),
                 w = thumb.getBoundingClientRect().width / 1.3,
                 width = or.width - w,
-                ox = e.clientX - or.left - w / 2,
+                ox = e.x - or.left - w / 2,
                 value = Math.med(0, Math.floor((ox / width) * Math.ceil(range / step)), range) / range;
             thumb.css('margin-left', value * width + 'px');
             input.value = min + value * range;
             input.trigger('input');
         };
-        thumb.listen('mousedown', startInput);
-        thumb.listen('touchstart', startInput);
-        window.listen('mousemove', inputValue);
-        window.listen('touchmove', inputValue);
-        window.listen('mouseup', stopInput);
-        window.listen('touchend', stopInput);
+        outer.listen('pointerdown', startInput);
+        window.listen('pointermove', inputValue);
+        outer.listen('click', function(e) {
+            startInput(e);
+            inputValue(e);
+            stopInput();
+        });
+        window.listen('pointerup', stopInput);
         var par = input.parentNode,
             index = Array.from(input.generation()).indexOf(input);
         input.hide();
