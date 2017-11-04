@@ -335,24 +335,6 @@ Sequence.create = function(delay, callback) {
 
 //#region - fix
 
-// fix functions
-Function.prototype.apply = (function(apply) {
-    return function(thisArg, args) {
-        switch (args.length) {
-            case 0:
-                return this.call(thisArg);
-            case 1:
-                return this.call(thisArg, args[0]);
-            case 2:
-                return this.call(thisArg, args[0], args[1]);
-            case 3:
-                return this.call(thisArg, args[0], args[1], args[2]);
-            default:
-                return apply.call(this, args);
-        }
-    };
-})(Function.prototype.apply);
-
 // fix Array
 if (!('from' in Array)) {
     Array.from = function(arrayLike) {
@@ -557,7 +539,7 @@ if (!('setImmediate' in window)) {
     window.setImmediate = function(handler) {
         var args = Array.from(arguments);
         args.splice(1, 0, 0);
-        return setTimeout.apply(this, args);
+        return setTimeout.apply(window, args);
     };
     window.clearImmediate = window.clearTimeout;
 }
@@ -903,15 +885,29 @@ var Agency = new Constructor(function() {
      */
     bind: function(object) {
         try {
+            var agency = this;
             Loop.each(['listen', 'listenOnce', 'ignore', 'ignoreAll', 'ignoreType'], function(m) {
-                object[m] = this[m].bind(this);
-            }, this);
+                object[m] = function() {
+                    agency[m].apply(agency, arguments);
+                    return this;
+                };
+            });
             return true;
         } catch (err) {
             return false;
         }
     }
 });
+/**
+ * @description To add a new agency to the object. ($obj._agency)
+ * @param {Object} obj The object.
+ * @returns {Object} The object.
+ */
+Agency.bind = function(obj) {
+    obj._agency = new Agency();
+    obj._agency.bind(obj);
+    return obj;
+};
 
 // extend Math
 Loop.each({
@@ -1323,10 +1319,17 @@ var Ani = {
                 ans = calc(mid);
             if (Math.abs(ans.x - x) <= limit) {
                 return ans.y;
-            } else if (ans.x > x) {
-                return find(x, left, mid);
             } else {
-                return find(x, mid, right);
+                try {
+                    if (ans.x > x) {
+                        return find(x, left, mid);
+                    } else {
+                        return find(x, mid, right);
+                    }
+                } catch (err) {
+                    console.warn('Failed to calculate more accurately:' + err);
+                    return ans.y;
+                }
             }
         };
         return function(at) {
