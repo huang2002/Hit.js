@@ -33,13 +33,12 @@ DOM.load(function() {
             if ('touches' in e) {
                 e = e.touches[0];
             }
-            var min = (input.attr('min') - 0) || 0,
-                max = input.attr('max') !== null ? (input.attr('max') - 0) : 100,
-                step = (input.attr('step') - 0) || 1,
+            var min = (input.min - 0) || 0,
+                max = input.max !== '' ? (input.max - 0) : 100,
+                step = (input.step - 0) || 1,
                 range = max - min,
                 or = outer.getBoundingClientRect(),
-                tr = thumb.getBoundingClientRect(),
-                w = tr.width,
+                w = thumb.getBoundingClientRect().width / 1.3,
                 width = or.width - w,
                 ox = e.clientX - or.left - w / 2,
                 value = Math.med(0, Math.floor((ox / width) * Math.ceil(range / step)), range) / range;
@@ -53,12 +52,15 @@ DOM.load(function() {
         window.listen('touchmove', inputValue);
         window.listen('mouseup', stopInput);
         window.listen('touchend', stopInput);
-        if (input.attr('value')) {
-            thumb.css('margin-left', value * (outer.getBoundingClientRect().width - thumb.getBoundingClientRect().width) + 'px');
-        }
         var par = input.parentNode,
             index = Array.from(input.generation()).indexOf(input);
         input.hide();
         outer.insertTo(index, par);
+        if (input.value) {
+            var min = (input.min - 0) || 0,
+                max = input.max !== '' ? (input.max - 0) : 100,
+                range = max - min;
+            thumb.css('margin-left', (input.value - min) / range * (outer.getBoundingClientRect().width - thumb.getBoundingClientRect().width / 1.3) + 'px');
+        }
     });
 });
