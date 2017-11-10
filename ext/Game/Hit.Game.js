@@ -147,29 +147,41 @@ Extension.export('Game-Controller',
  * @property {number} padding The padding of the view.
  * @method toGameX(x:number) To convert the global position to game position.
  * @method toGameY(y:number) To convert the global position to game position.
+ * @method toGamePos(pos) To convert the global position to game position.
  */
-Extension.export('Game-UI', function (game) {
-    this.width = 960;
-    this.height = 640;
-    this.padding = 5;
-    Object.defineProperties(this, {
-        left: { value: 0 },
-        top: { value: 0 },
-        right: { get: function () { return this.width; } },
-        bottom: { get: function () { return this.height; } },
-        cx: { get: function () { return this.width / 2; } },
-        cy: { get: function () { return this.height / 2; } }
-    });
-    var canvas = game._canvas;
-    this.toGameX = function (x) {
-        var rect = canvas.getBoundingClientRect();
-        return (x - rect.left) / rect.width * this.width;
-    };
-    this.toGameY = function (y) {
-        var rect = canvas.getBoundingClientRect();
-        return (y - rect.top) / rect.height * this.height;
-    };
-});
+Extension.export('Game-UI',
+    new Constructor(
+        function (game) {
+            this.width = 960;
+            this.height = 640;
+            this.padding = 5;
+            Object.defineProperties(this, {
+                left: { value: 0 },
+                top: { value: 0 },
+                right: { get: function () { return this.width; } },
+                bottom: { get: function () { return this.height; } },
+                cx: { get: function () { return this.width / 2; } },
+                cy: { get: function () { return this.height / 2; } }
+            });
+            var canvas = game._canvas;
+            this.toGameX = function (x) {
+                var rect = canvas.getBoundingClientRect();
+                return (x - rect.left) / rect.width * this.width;
+            };
+            this.toGameY = function (y) {
+                var rect = canvas.getBoundingClientRect();
+                return (y - rect.top) / rect.height * this.height;
+            };
+        }, {
+            toGamePos: function (pos) {
+                return {
+                    x: this.toGameX(pos.x),
+                    y: this.toGameY(pos.y)
+                };
+            }
+        }
+    )
+);
 
 /**
  * @description The constructor of game managers.
@@ -316,3 +328,85 @@ Extension.define('Game', [
     });
     return Game;
 });
+
+/**
+ * @description The constructor of vectors.
+ * @property {number} x x.
+ * @property {number} y y.
+ */
+Extension.export('Vector',
+    new Constructor(
+        function (x, y) {
+            this.x = x;
+            this.y = y;
+            if (arguments.length >= 2) {
+                this.set(x, y);
+            }
+        }, {
+            /**
+             * @description To set the vector to v.
+             * @param {Vector} v v.
+             * @returns {Vector} Self.
+             */
+            setVec: function (v) {
+                return this.set(v.x, v.y);
+            },
+            /**
+             * @description To set the vector.
+             * @param {number} x x.
+             * @param {number} y y.
+             * @returns {Vector} Self.
+             */
+            set: function (x, y) {
+                if (typeof x === 'number') {
+                    this.x = x;
+                }
+                if (typeof y === 'number') {
+                    this.y = y;
+                }
+                return this;
+            },
+            /**
+             * @description To add (x,y) to the vector.
+             * @param {number} x x.
+             * @param {number} y y.
+             * @returns {Vector} Self.
+             */
+            add: function (x, y) {
+                if (typeof x === 'number') {
+                    this.x += x;
+                }
+                if (typeof y === 'number') {
+                    this.y += y;
+                }
+                return this;
+            },
+            /**
+             * @description To add v to the vector.
+             * @param {Vector} v v.
+             * @returns {Vector} Self.
+             */
+            addVec: function (v) {
+                return this.add(v.x, v.y);
+            },
+            /**
+             * @description To get the size of the vector.
+             * @returns {number} The size of the vector.
+             */
+            getSize: function () {
+                return Math.distance(0, 0, this.x, this.y);
+            },
+            /**
+             * @description To set the size of the vector.
+             * @param {number} size The size.
+             * @returns {Vector} Self.
+             */
+            setSize: function (size) {
+                var scale = size / this.getSize();
+                this.x *= scale;
+                this.y *= scale;
+                return this;
+            }
+        }
+    )
+);
