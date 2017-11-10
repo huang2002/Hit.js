@@ -12,7 +12,7 @@
  * @param {{[key: string]: string}} prototype The prototype.
  * @returns {Function} The constructor.
  */
-var Constructor = function(fn, prototype) {
+var Constructor = function (fn, prototype) {
     fn.prototype = prototype || {};
     return fn;
 };
@@ -25,7 +25,7 @@ var Loop = {
      * @param {(value, index, arr) => void} callback The function to receive the elements.
      * @param {any} thisArg The "this" argument of "callback".
      */
-    each: function(arr, callback, thisArg) {
+    each: function (arr, callback, thisArg) {
         if (!(arr instanceof Object)) {
             return;
         }
@@ -46,13 +46,13 @@ var Loop = {
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {Array<any>} The result contains the values returned by callback.
      */
-    map: function(arr, callback, thisArg) {
+    map: function (arr, callback, thisArg) {
         if (!(arr instanceof Object)) {
             return;
         }
         var isArray = typeof arr.length === 'number',
             ans = isArray ? [] : {};
-        Loop.each(arr, function(v, i, a) {
+        Loop.each(arr, function (v, i, a) {
             var val = callback.call(this, v, i, a);
             if (isArray) {
                 ans.push(val);
@@ -69,13 +69,13 @@ var Loop = {
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {Array<any>} The result contains all the values filtered by callback.
      */
-    filter: function(arr, callback, thisArg) {
+    filter: function (arr, callback, thisArg) {
         if (!(arr instanceof Object)) {
             return;
         }
         var isArray = typeof arr.length === 'number',
             ans = isArray ? [] : {};
-        Loop.each(arr, function(v, i, a) {
+        Loop.each(arr, function (v, i, a) {
             var val = callback.call(this, v, i, a);
             if (!val) {
                 return;
@@ -95,9 +95,9 @@ var Loop = {
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {any} The element matches the condition.
      */
-    find: function(arr, callback, thisArg) {
+    find: function (arr, callback, thisArg) {
         try {
-            Loop.each(arr, function(v, k, a) {
+            Loop.each(arr, function (v, k, a) {
                 if (callback.call(this, v, k, a)) {
                     throw v;
                 }
@@ -114,9 +114,9 @@ var Loop = {
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {number|string} The index/key of the element which matches the condition.
      */
-    findIndex: function(arr, callback, thisArg) {
+    findIndex: function (arr, callback, thisArg) {
         try {
-            Loop.each(arr, function(v, k, a) {
+            Loop.each(arr, function (v, k, a) {
                 if (callback.call(this, v, k, a)) {
                     throw k;
                 }
@@ -133,9 +133,9 @@ var Loop = {
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {boolean} Whether there is any element matches the condition.
      */
-    some: function(arr, callback, thisArg) {
+    some: function (arr, callback, thisArg) {
         try {
-            Loop.each(arr, function(v, i, a) {
+            Loop.each(arr, function (v, i, a) {
                 if (callback.call(this, v, i, a)) {
                     throw true;
                 }
@@ -152,9 +152,9 @@ var Loop = {
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {boolean} Whether there all the elements match the condition.
      */
-    every: function(arr, callback, thisArg) {
+    every: function (arr, callback, thisArg) {
         try {
-            Loop.each(arr, function(v, i, a) {
+            Loop.each(arr, function (v, i, a) {
                 if (!callback.call(this, v, i, a)) {
                     throw false;
                 }
@@ -166,7 +166,7 @@ var Loop = {
     }
 };
 
-/** @description This object has some methods about comparision. */
+/** @description This object has some methods about comparison. */
 var Compare = {
     /**
      * @description Tell whether a equals b. (NaN will equal NaN)
@@ -174,7 +174,7 @@ var Compare = {
      * @param {any} b Another variable to compare.
      * @returns {boolean} Whether a equals b.
      */
-    equal: function(a, b) {
+    equal: function (a, b) {
         return (a === b) || (isNaN(a) && isNaN(b));
     }
 };
@@ -186,9 +186,9 @@ Loop.each({
      * @param {Function} fn The function to append.
      * @returns {Function} A new function.
      */
-    after: function(fn) {
+    after: function (fn) {
         var f = this;
-        return function() {
+        return function () {
             var ans = f.apply(this, arguments);
             fn.apply(this, arguments);
             return ans;
@@ -199,9 +199,9 @@ Loop.each({
      * @param {Function} fn The function to append.
      * @returns {Function} A new function.
      */
-    before: function(fn) {
+    before: function (fn) {
         var f = this;
-        return function() {
+        return function () {
             fn.apply(this, arguments);
             return f.apply(this, arguments);
         };
@@ -210,13 +210,13 @@ Loop.each({
      * @description To create a single instance constructor from the function.
      * @returns {Function} The constructor.
      */
-    single: function() {
+    single: function () {
         var instance = undefined,
             constructor = this;
-        return function() {
+        return function () {
             if (instance === undefined) {
                 instance = {};
-                Loop.each(constructor.prototype, function(value, name) {
+                Loop.each(constructor.prototype, function (value, name) {
                     instance[name] = value;
                 });
                 constructor.apply(instance, arguments);
@@ -224,7 +224,7 @@ Loop.each({
             return instance;
         };
     }
-}, function(ext, key) {
+}, function (ext, key) {
     Function.prototype[key] = ext;
 });
 
@@ -232,68 +232,68 @@ Loop.each({
  * @description The constructor of object pools.
  * @param {Function} constructor The constructor of the objects in the pool.
  */
-var ObjectPool = new Constructor(function(constructor) {
+var ObjectPool = new Constructor(function (constructor) {
     Object.defineProperty(this, 'constructor', { value: constructor || Object });
     this._pool = [];
 }, {
-    /**
-     * @description To get an object from the pool. If there's not any object, will create a new object from the constructor.
-     * @returns {this.constructor} An object.
-     */
-    get: function() {
-        return this._pool.length ? this._pool.shift() : new this.constructor();
-    },
-    /**
-     * @description To recycle an object so that it can be used again.
-     * @param {this.constructor} obj The object to recycle.
-     * @returns {number} How many objects are now in the pool.
-     */
-    recycle: function(obj) {
-        if (!(obj instanceof constructor)) {
-            throw new Error('Please input an instance of the constructor!');
+        /**
+         * @description To get an object from the pool. If there's not any object, will create a new object from the constructor.
+         * @returns {this.constructor} An object.
+         */
+        get: function () {
+            return this._pool.length ? this._pool.shift() : new this.constructor();
+        },
+        /**
+         * @description To recycle an object so that it can be used again.
+         * @param {this.constructor} obj The object to recycle.
+         * @returns {number} How many objects are now in the pool.
+         */
+        recycle: function (obj) {
+            if (!(obj instanceof constructor)) {
+                throw new Error('Please input an instance of the constructor!');
+            }
+            this._pool.push(obj);
+            return this._pool.length;
+        },
+        /**
+         * @description To count how many objects are in the pool.
+         * @returns {number} The result.
+         */
+        count: function () {
+            return this._pool.length;
+        },
+        /**
+         * @description To prepare enough objects to use.
+         * @param {number} count How many objects you need.
+         * @returns {ObjectPool} Self.
+         */
+        prepare: function (count) {
+            if (typeof count !== 'number') {
+                console.warn('"count" must be a number!');
+                return;
+            }
+            while (this._pool.length < count) {
+                this._pool.push(new this.constructor());
+            }
+            return this;
+        },
+        /**
+         * @description To drop all the objects in the pool.
+         * @returns {Array<this.constructor>} The result.
+         */
+        drop: function () {
+            var p = Loop.map(this._pool, function (o) { return o; });
+            this._pool = [];
+            return p;
         }
-        this._pool.push(obj);
-        return this._pool.length;
-    },
-    /**
-     * @description To count how many objects are in the pool.
-     * @returns {number} The result.
-     */
-    count: function() {
-        return this._pool.length;
-    },
-    /**
-     * @description To prepare enough objects to use.
-     * @param {number} count How many objects you need.
-     * @returns {ObjectPool} Self.
-     */
-    prepare: function(count) {
-        if (typeof count !== 'number') {
-            console.warn('"count" must be a number!');
-            return;
-        }
-        while (this._pool.length < count) {
-            this._pool.push(new this.constructor());
-        }
-        return this;
-    },
-    /**
-     * @description To drop all the objects in the pool.
-     * @returns {Array<this.constructor>} The result.
-     */
-    drop: function() {
-        var p = Loop.map(this._pool, function(o) { return o; });
-        this._pool = [];
-        return p;
-    }
-});
+    });
 
 /**
  * @description The constructor of sequences.
  * @param {number} delay The delay.
  * @param {Function} callback The callback.
  */
-var Sequence = new Constructor(function(delay, callback) {
+var Sequence = new Constructor(function (delay, callback) {
     this._callbacks = [];
     this._delays = [];
     this._offset = 0;
@@ -301,35 +301,35 @@ var Sequence = new Constructor(function(delay, callback) {
         this.next(delay, callback);
     }
 }, {
-    /**
-     * @description To set the next callback and delay.
-     * @param {number} delay The delay.
-     * @param {Function} callback The callback.
-     * @returns {Sequence} Self.
-     */
-    next: function(delay, callback) {
-        this._callbacks.push(callback);
-        this._delays.push(delay + this._offset);
-        this._offset += delay;
-        return this;
-    },
-    /**
-     * @description To execute the sequence.
-     * @returns {Array<number>} The IDs returned by setTimeout.
-     */
-    execute: function() {
-        return Loop.map(this._callbacks, function(callback, i) {
-            return setTimeout(callback, this._delays[i]);
-        }, this);
-    }
-});
+        /**
+         * @description To set the next callback and delay.
+         * @param {number} delay The delay.
+         * @param {Function} callback The callback.
+         * @returns {Sequence} Self.
+         */
+        next: function (delay, callback) {
+            this._callbacks.push(callback);
+            this._delays.push(delay + this._offset);
+            this._offset += delay;
+            return this;
+        },
+        /**
+         * @description To execute the sequence.
+         * @returns {Array<number>} The IDs returned by setTimeout.
+         */
+        execute: function () {
+            return Loop.map(this._callbacks, function (callback, i) {
+                return setTimeout(callback, this._delays[i]);
+            }, this);
+        }
+    });
 /**
  * @description To create a new sequence.
  * @param {number} delay The delay.
  * @param {Function} callback The callback.
  * @returns {Sequence} The sequence.
  */
-Sequence.create = function(delay, callback) {
+Sequence.create = function (delay, callback) {
     return new Sequence(delay, callback);
 };
 
@@ -337,37 +337,37 @@ Sequence.create = function(delay, callback) {
 
 // fix Array
 if (!('from' in Array)) {
-    Array.from = function(arrayLike) {
-        return Loop.map(arrayLike, function(e) { return e; });
+    Array.from = function (arrayLike) {
+        return Loop.map(arrayLike, function (e) { return e; });
     };
 }
 if (!('of' in Array)) {
-    Array.of = function() {
+    Array.of = function () {
         return Array.from(arguments);
     };
 }
 if (!('includes' in Array.prototype)) {
-    Array.prototype.includes = function(ele) {
-        return Loop.find(this, function(e) { return Compare.equal(e, ele); });
+    Array.prototype.includes = function (ele) {
+        return Loop.find(this, function (e) { return Compare.equal(e, ele); });
     };
 }
 
 // fix Map
 if (!('Map' in window)) {
-    window.Map = function(initialVal) {
+    window.Map = function (initialVal) {
         var keys = [],
             values = [];
         Object.defineProperty(this, 'size', {
-            get: function() {
+            get: function () {
                 return keys.length;
             }
         });
-        this.clear = function() {
+        this.clear = function () {
             keys = [];
             values = [];
         };
-        this.delete = function(key) {
-            return Loop.find(keys, function(k, i) {
+        this.delete = function (key) {
+            return Loop.find(keys, function (k, i) {
                 if (Compare.equal(key, k)) {
                     keys.splice(i, 1);
                     values.splice(i, 1);
@@ -375,14 +375,14 @@ if (!('Map' in window)) {
                 }
             });
         };
-        this.forEach = function(callback, thisArg) {
-            Loop.each(keys, function(k, i) {
+        this.forEach = function (callback, thisArg) {
+            Loop.each(keys, function (k, i) {
                 callback.call(thisArg, values[i], k, this);
             }, this);
         };
-        this.get = function(key) {
+        this.get = function (key) {
             try {
-                return this.forEach(function(v, k) {
+                return this.forEach(function (v, k) {
                     if (Compare.equal(key, k)) {
                         throw v;
                     }
@@ -391,17 +391,17 @@ if (!('Map' in window)) {
                 return v;
             }
         };
-        this.has = function(key) {
+        this.has = function (key) {
             return keys.includes(key);
         };
-        this.set = function(key, value) {
+        this.set = function (key, value) {
             this.delete(key);
             keys.push(key);
             values.push(value);
             return this;
         };
         if (initialVal) {
-            Loop.each(initialVal, function(pair) {
+            Loop.each(initialVal, function (pair) {
                 this.set(pair[0], pair[1]);
             });
         }
@@ -410,33 +410,33 @@ if (!('Map' in window)) {
 
 // fix Set
 if (!('Set' in window)) {
-    window.Set = function(initialVal) {
+    window.Set = function (initialVal) {
         var values = [];
         Object.defineProperty(this, 'size', {
-            get: function() {
+            get: function () {
                 return values.length;
             }
         });
-        this.clear = function() {
+        this.clear = function () {
             values = [];
         };
-        this.delete = function(value) {
-            return Loop.find(values, function(v, i) {
+        this.delete = function (value) {
+            return Loop.find(values, function (v, i) {
                 if (Compare.equal(value, v)) {
                     values.splice(i, 1);
                     return true;
                 }
             });
         };
-        this.forEach = function(callback, thisArg) {
-            Loop.each(values, function(v, i) {
+        this.forEach = function (callback, thisArg) {
+            Loop.each(values, function (v, i) {
                 callback.call(thisArg, v, v, this);
             }, this);
         };
-        this.has = function(value) {
+        this.has = function (value) {
             return values.includes(value);
         };
-        this.set = function(value) {
+        this.set = function (value) {
             this.delete(value);
             values.push(value);
             return this;
@@ -449,13 +449,13 @@ if (!('Set' in window)) {
 
 // fix Promise
 if (!('Promise' in window)) {
-    window.Promise = function(executor) {
+    window.Promise = function (executor) {
         var onfulfilledCallbacks = [],
             onrejectedCallbacks = [],
             onerrorCallbacks = [],
             value = null,
             status = 'pending';
-        this.then = function(onfulfilled, onrejected) {
+        this.then = function (onfulfilled, onrejected) {
             if (onrejected) {
                 if (status === 'rejected') {
                     setTimeout(onrejected, 0, value);
@@ -464,8 +464,8 @@ if (!('Promise' in window)) {
                 }
             }
             if (onfulfilled) {
-                return (new Promise)(function(resolve, reject) {
-                    onfulfilledCallbacks.push(function(data) {
+                return (new Promise)(function (resolve, reject) {
+                    onfulfilledCallbacks.push(function (data) {
                         if (onfulfilled instanceof Function) {
                             try {
                                 var val = onfulfilled(data);
@@ -486,19 +486,19 @@ if (!('Promise' in window)) {
                 return this;
             }
         };
-        this.catch = function(onerror) {
+        this.catch = function (onerror) {
             onerrorCallbacks.push(error);
             return this;
         };
         if (executor) {
-            setTimeout(function() {
-                executor(function(data) {
+            setTimeout(function () {
+                executor(function (data) {
                     status = 'resolved';
                     value = data;
                     for (var i = 0; i < onfulfilledCallbacks.length; i++) {
                         onfulfilledCallbacks[i](value);
                     }
-                }, function(reason) {
+                }, function (reason) {
                     status = 'rejected';
                     value = reason;
                     var callbacks = onrejectedCallbacks.length > 0 ? onrejectedCallbacks : onerrorCallbacks;
@@ -511,23 +511,23 @@ if (!('Promise' in window)) {
     };
 }
 if (!('done' in Promise.prototype)) {
-    Promise.prototype.done = function(onfulfilled, onrejected) {
+    Promise.prototype.done = function (onfulfilled, onrejected) {
         this.then(onfulfilled, onrejected)
-            .catch(function(err) {
+            .catch(function (err) {
                 throw err;
             });
     };
 }
 if (!('reject' in Promise)) {
-    Promise.reject = function(reason) {
-        return new Promise(function(resolve, reject) {
+    Promise.reject = function (reason) {
+        return new Promise(function (resolve, reject) {
             reject(reason);
         });
     };
 }
 if (!('resolve' in Promise)) {
-    Promise.resolve = function(data) {
-        return new Promise(function(resolve, reject) {
+    Promise.resolve = function (data) {
+        return new Promise(function (resolve, reject) {
             resolve(data);
         });
     };
@@ -536,7 +536,7 @@ if (!('resolve' in Promise)) {
 
 // fix setImmediate
 if (!('setImmediate' in window)) {
-    window.setImmediate = function(handler) {
+    window.setImmediate = function (handler) {
         var args = Array.from(arguments);
         args.splice(1, 0, 0);
         return setTimeout.apply(window, args);
@@ -546,7 +546,7 @@ if (!('setImmediate' in window)) {
 
 // fix requestAnimationFrame
 if (!('requestAnimationFrame') in window) {
-    window.requestAnimationFrame = function(handler) {
+    window.requestAnimationFrame = function (handler) {
         return setTimeout(handler, 15);
     };
     window.cancelAnimationFrame = window.clearTimeout;
@@ -554,12 +554,12 @@ if (!('requestAnimationFrame') in window) {
 
 // fix Event
 if (!('preventDefault' in Event.prototype)) {
-    Event.prototype.preventDefault = function() {
+    Event.prototype.preventDefault = function () {
         this.returnValue = false;
     };
 }
 if (!('stopPropagation' in Event.prototype)) {
-    Event.prototype.stopPropagation = function() {
+    Event.prototype.stopPropagation = function () {
         this.bubbles = false;
     };
 }
@@ -575,79 +575,79 @@ if (!('stopPropagation' in Event.prototype)) {
  * @property {ChainNode} next Next node.
  * @property {any} value The value of the node.
  */
-var ChainNode = new Constructor(function(value) {
+var ChainNode = new Constructor(function (value) {
     this.next = null;
     this.prev = null;
     this.value = value;
 }, {
-    /**
-     * @description To insert a node after the node.
-     * @param {ChainNode} node The node to insert.
-     * @returns {ChainNode} Next node if it isn't null, self otherwise.
-     */
-    insertAfter: function(node) {
-        if (node == null) {
-            if (this.next) {
-                this.next.prev = null;
-                this.next = null;
+        /**
+         * @description To insert a node after the node.
+         * @param {ChainNode} node The node to insert.
+         * @returns {ChainNode} Next node if it isn't null, self otherwise.
+         */
+        insertAfter: function (node) {
+            if (node == null) {
+                if (this.next) {
+                    this.next.prev = null;
+                    this.next = null;
+                }
+                return this;
             }
-            return this;
-        }
-        if (!ChainNode.check(node)) {
-            console.warn('Illegal node');
-            return undefined;
-        }
-        this.next = node;
-        if (node.prev) {
-            node.prev.next = null;
-        }
-        node.prev = this;
-        return node;
-    },
-    /**
-     * @description To insert a node before the node.
-     * @param {ChainNode} node The node to insert.
-     * @returns {ChainNode} Pervious node if it isn't null, self otherwise.
-     */
-    insertBefore: function(node) {
-        if (node == null) {
+            if (!ChainNode.check(node)) {
+                console.warn('Illegal node');
+                return undefined;
+            }
+            this.next = node;
+            if (node.prev) {
+                node.prev.next = null;
+            }
+            node.prev = this;
+            return node;
+        },
+        /**
+         * @description To insert a node before the node.
+         * @param {ChainNode} node The node to insert.
+         * @returns {ChainNode} Pervious node if it isn't null, self otherwise.
+         */
+        insertBefore: function (node) {
+            if (node == null) {
+                if (this.prev) {
+                    this.prev.next = null;
+                    this.prev = null;
+                }
+                return this;
+            }
+            if (!ChainNode.check(node)) {
+                console.warn('Illegal node');
+                return undefined;
+            }
+            this.prev = node;
+            if (node.next) {
+                node.next.prev = null;
+            }
+            node.next = this;
+            return node;
+        },
+        /**
+         * @description To remove the node.
+         * @returns {undefined} No return value.
+         */
+        remove: function () {
             if (this.prev) {
                 this.prev.next = null;
                 this.prev = null;
             }
-            return this;
+            if (this.next) {
+                this.next.prev = null;
+                this.next = null;
+            }
         }
-        if (!ChainNode.check(node)) {
-            console.warn('Illegal node');
-            return undefined;
-        }
-        this.prev = node;
-        if (node.next) {
-            node.next.prev = null;
-        }
-        node.next = this;
-        return node;
-    },
-    /**
-     * @description To remove the node.
-     * @returns {undefined} No return value.
-     */
-    remove: function() {
-        if (this.prev) {
-            this.prev.next = null;
-            this.prev = null;
-        }
-        if (this.next) {
-            this.next.prev = null;
-            this.next = null;
-        }
-    }
-});
+    });
 /**
  * @description To check if the object is a node or a node like.
  * @returns {boolean} The result.
  */
-ChainNode.check = function(obj) {
+ChainNode.check = function (obj) {
     return node instanceof Object && 'next' in node && 'prev' in node;
 };
 /**
@@ -656,107 +656,107 @@ ChainNode.check = function(obj) {
  * @property {ChainNode} tail The last node.
  * @property {ChainNode} pointer The pointer.
  */
-var Chain = new Constructor(function(initialVal) {
+var Chain = new Constructor(function (initialVal) {
     this.head = null;
     this.tail = null;
     this.pointer = null;
     if (initialVal) {
-        Loop.each(initialVal, function(val) {
+        Loop.each(initialVal, function (val) {
             this.append(new ChainNode(val));
         }, this);
     }
 }, {
-    /**
-     * @description To count the nodes of the chain.
-     * @returns {number} The length of the chain.
-     */
-    count: function() {
-        if (!this.head) {
-            return 0;
-        }
-        var ans = 1,
-            maxLen = Chain.maxLen,
-            node = this.head;
-        while (node !== this.tail) {
-            ans++;
-            node = node.next;
-            if (ans > maxLen) {
-                console.warn('This chain may be too long to count.');
-                return maxLen;
+        /**
+         * @description To count the nodes of the chain.
+         * @returns {number} The length of the chain.
+         */
+        count: function () {
+            if (!this.head) {
+                return 0;
             }
-        }
-        return ans;
-    },
-    /**
-     * @description To append a node.
-     * @param {ChainNode} node The node to append.
-     * @returns {Chain} Self.
-     */
-    append: function(node) {
-        if (!ChainNode.check(node)) {
-            console.warn('Illegal node');
-            return undefined;
-        }
-        if (this.tail) {
-            node.prev = this.tail;
-            this.tail.next = node;
-            this.tail = node;
-        } else {
-            this.pointer = this.tail = this.head = node;
-        }
-        return this;
-    },
-    /**
-     * @description To convert the chain to array.
-     * @param {boolean} copy Whether to copy the nodes. (default value is true)
-     * @returns {Array<ChainNode>} The result.
-     */
-    toArray: function(copy) {
-        if (!this.head) {
-            return [];
-        }
-        var maxLen = Chain.maxLen,
-            node = this.head,
-            ans = [node];
-        while (node !== this.tail) {
-            node = node.next;
-            ans.push(copy !== false ? new ChainNode(node) : node);
-            if (ans.length > maxLen) {
-                console.warn('This chain may be too long to convert.');
-                return ans;
+            var ans = 1,
+                maxLen = Chain.maxLen,
+                node = this.head;
+            while (node !== this.tail) {
+                ans++;
+                node = node.next;
+                if (ans > maxLen) {
+                    console.warn('This chain may be too long to count.');
+                    return maxLen;
+                }
             }
+            return ans;
+        },
+        /**
+         * @description To append a node.
+         * @param {ChainNode} node The node to append.
+         * @returns {Chain} Self.
+         */
+        append: function (node) {
+            if (!ChainNode.check(node)) {
+                console.warn('Illegal node');
+                return undefined;
+            }
+            if (this.tail) {
+                node.prev = this.tail;
+                this.tail.next = node;
+                this.tail = node;
+            } else {
+                this.pointer = this.tail = this.head = node;
+            }
+            return this;
+        },
+        /**
+         * @description To convert the chain to array.
+         * @param {boolean} copy Whether to copy the nodes. (default value is true)
+         * @returns {Array<ChainNode>} The result.
+         */
+        toArray: function (copy) {
+            if (!this.head) {
+                return [];
+            }
+            var maxLen = Chain.maxLen,
+                node = this.head,
+                ans = [node];
+            while (node !== this.tail) {
+                node = node.next;
+                ans.push(copy !== false ? new ChainNode(node) : node);
+                if (ans.length > maxLen) {
+                    console.warn('This chain may be too long to convert.');
+                    return ans;
+                }
+            }
+            return ans;
+        },
+        /**
+         * @description To move the pointer to the first node.
+         * @returns {ChainNode} The first node.
+         */
+        reset: function () {
+            return this.pointer = this.head;
+        },
+        /**
+         * @description To move the pointer to next node.
+         * @returns {ChainNode} Next node.
+         */
+        next: function () {
+            if (this.pointer) {
+                this.pointer = this.pointer.next;
+            }
+            return this.pointer;
+        },
+        /**
+         * @description To abandon the last node.
+         * @returns {Chain} Self.
+         */
+        abandon: function () {
+            if (this.tail) {
+                this.tail.prev.next = null;
+                this.tail = this.tail.prev;
+            }
+            return this;
         }
-        return ans;
-    },
-    /**
-     * @description To move the pointer to the first node.
-     * @returns {ChainNode} The first node.
-     */
-    reset: function() {
-        return this.pointer = this.head;
-    },
-    /**
-     * @description To move the pointer to next node.
-     * @returns {ChainNode} Next node.
-     */
-    next: function() {
-        if (this.pointer) {
-            this.pointer = this.pointer.next;
-        }
-        return this.pointer;
-    },
-    /**
-     * @description To abandon the last node.
-     * @returns {Chain} Self.
-     */
-    abandon: function() {
-        if (this.tail) {
-            this.tail.prev.next = null;
-            this.tail = this.tail.prev;
-        }
-        return this;
-    }
-});
+    });
 /**
  * @description The max length of a chain.
  * @type {number}
@@ -769,141 +769,141 @@ Chain.maxLen = 99999;
  * @description The constructor of agencies.
  * @property {boolean} cache Whether to store the trigger action without being executed at once.
  */
-var Agency = new Constructor(function() {
+var Agency = new Constructor(function () {
     this._listeners = {};
     this._caches = {};
     this.cache = false;
 }, {
-    /**
-     * @description To trigger the listeners listening at the type.
-     * @param {string} type The type.
-     * @param {ArrayLike} args The arguments given to the listeners.
-     * @returns {boolean} Whether the trigger action is successful.
-     */
-    trigger: function(type, args) {
-        args = args || [];
-        if (!(args instanceof Object && 'length' in args)) {
-            args = [args];
-        }
-        if (!(type in this._listeners)) {
-            if (this.cache) {
-                if (!(type in this._caches)) {
-                    this._caches[type] = [];
-                }
-                this._caches[type].push(args);
+        /**
+         * @description To trigger the listeners listening at the type.
+         * @param {string} type The type.
+         * @param {ArrayLike} args The arguments given to the listeners.
+         * @returns {boolean} Whether the trigger action is successful.
+         */
+        trigger: function (type, args) {
+            args = args || [];
+            if (!(args instanceof Object && 'length' in args)) {
+                args = [args];
             }
-            return false;
-        }
-        this._listeners[type].forEach(function(fn) {
-            fn.apply(null, args);
-        });
-        return true;
-    },
-    /**
-     * @description To create a trigger.
-     * @param {string} type The type that the trigger listens at.
-     * @returns {Function} The trigger.
-     */
-    newTrigger: function(type) {
-        return function(args) {
-            self.trigger(type, args);
-        }.bind(this);
-    },
-    /**
-     * @description To add a listener of the type.
-     * @param {string} type The type to listen.
-     * @param {Function} fn The listener.
-     * @returns {Agency} Self.
-     */
-    listen: function(type, fn) {
-        if (this.cache && (type in this._caches)) {
-            this._caches[type].forEach(function(args) {
+            if (!(type in this._listeners)) {
+                if (this.cache) {
+                    if (!(type in this._caches)) {
+                        this._caches[type] = [];
+                    }
+                    this._caches[type].push(args);
+                }
+                return false;
+            }
+            this._listeners[type].forEach(function (fn) {
                 fn.apply(null, args);
             });
-            delete this._caches[type];
-        } else {
-            if (this._listeners[type] === undefined) {
-                this._listeners[type] = [];
+            return true;
+        },
+        /**
+         * @description To create a trigger.
+         * @param {string} type The type that the trigger listens at.
+         * @returns {Function} The trigger.
+         */
+        newTrigger: function (type) {
+            return function (args) {
+                self.trigger(type, args);
+            }.bind(this);
+        },
+        /**
+         * @description To add a listener of the type.
+         * @param {string} type The type to listen.
+         * @param {Function} fn The listener.
+         * @returns {Agency} Self.
+         */
+        listen: function (type, fn) {
+            if (this.cache && (type in this._caches)) {
+                this._caches[type].forEach(function (args) {
+                    fn.apply(null, args);
+                });
+                delete this._caches[type];
+            } else {
+                if (this._listeners[type] === undefined) {
+                    this._listeners[type] = [];
+                }
+                this._listeners[type].push(fn);
             }
-            this._listeners[type].push(fn);
-        }
-        return this;
-    },
-    /**
-     * @description To add a listener of the type which  will be used only once.
-     * @param {string} type The type to listen.
-     * @param {Function} fn The listener.
-     * @returns {Agency} Self.
-     */
-    listenOnce: function(type, fn) {
-        var _this = this,
-            listener = function() {
-                fn.apply(this, arguments);
-                _this.ignore(type, listener);
-            };
-        return this.listen(type, listener);
-    },
-    /**
-     * @description To remove a listener of the type.
-     * @param {string} type The type of the listener to remove.
-     * @param {Function} fn The listener.
-     * @returns {Agency} Self.
-     */
-    ignore: function(type, fn) {
-        var l = this._listeners[type];
-        if (l !== undefined) {
-            for (var i = 0; i < l.length; i++) {
-                if (l[i] === fn) {
-                    return true;
+            return this;
+        },
+        /**
+         * @description To add a listener of the type which  will be used only once.
+         * @param {string} type The type to listen.
+         * @param {Function} fn The listener.
+         * @returns {Agency} Self.
+         */
+        listenOnce: function (type, fn) {
+            var _this = this,
+                listener = function () {
+                    fn.apply(this, arguments);
+                    _this.ignore(type, listener);
+                };
+            return this.listen(type, listener);
+        },
+        /**
+         * @description To remove a listener of the type.
+         * @param {string} type The type of the listener to remove.
+         * @param {Function} fn The listener.
+         * @returns {Agency} Self.
+         */
+        ignore: function (type, fn) {
+            var l = this._listeners[type];
+            if (l !== undefined) {
+                for (var i = 0; i < l.length; i++) {
+                    if (l[i] === fn) {
+                        return true;
+                    }
                 }
             }
-        }
-        return false;
-    },
-    /**
-     * @description To remove listeners of the type.
-     * @param {string} type The type of the listener to remove.
-     * @returns {boolean} Whether the ignoring is successful.
-     */
-    ignoreType: function(type) {
-        return this._listeners[type] === undefined ? false : this._listeners[type] = undefined && true;
-    },
-    /**
-     * @description To remove all the listeners of the agency.
-     * @returns {boolean} Whether the ignoring is successful.
-     */
-    ignoreAll: function() {
-        var ans = !!this._listeners || !!this._caches;
-        this._listeners = {};
-        this._caches = {};
-        return ans;
-    },
-    /**
-     * @description To bind some methods(listen, ignore, ignoreAll, ignoreType) of the agency on the object.
-     * @param {Object} object The object.
-     * @returns {boolean} Whether it binds successfully.
-     */
-    bind: function(object) {
-        try {
-            var agency = this;
-            Loop.each(['listen', 'listenOnce', 'ignore', 'ignoreAll', 'ignoreType'], function(m) {
-                object[m] = function() {
-                    agency[m].apply(agency, arguments);
-                    return this;
-                };
-            });
-            return true;
-        } catch (err) {
             return false;
+        },
+        /**
+         * @description To remove listeners of the type.
+         * @param {string} type The type of the listener to remove.
+         * @returns {boolean} Whether the ignoring is successful.
+         */
+        ignoreType: function (type) {
+            return this._listeners[type] === undefined ? false : this._listeners[type] = undefined && true;
+        },
+        /**
+         * @description To remove all the listeners of the agency.
+         * @returns {boolean} Whether the ignoring is successful.
+         */
+        ignoreAll: function () {
+            var ans = !!this._listeners || !!this._caches;
+            this._listeners = {};
+            this._caches = {};
+            return ans;
+        },
+        /**
+         * @description To bind some methods(listen, ignore, ignoreAll, ignoreType) of the agency on the object.
+         * @param {Object} object The object.
+         * @returns {boolean} Whether it binds successfully.
+         */
+        bind: function (object) {
+            try {
+                var agency = this;
+                Loop.each(['listen', 'listenOnce', 'ignore', 'ignoreAll', 'ignoreType'], function (m) {
+                    object[m] = function () {
+                        agency[m].apply(agency, arguments);
+                        return this;
+                    };
+                });
+                return true;
+            } catch (err) {
+                return false;
+            }
         }
-    }
-});
+    });
 /**
  * @description To add a new agency to the object. ($obj._agency)
  * @param {Object} obj The object.
  * @returns {Object} The object.
  */
-Agency.bind = function(obj) {
+Agency.bind = function (obj) {
     obj._agency = new Agency();
     obj._agency.bind(obj);
     return obj;
@@ -917,10 +917,10 @@ Loop.each({
      * @param {boolean} sort Whether to sort the array.
      * @returns {number} The element in the middle of the array.
      */
-    mid: function(arr, sort) {
+    mid: function (arr, sort) {
         arr = Array.from(arr);
         if (sort !== false) {
-            arr = arr.sort(function(a, b) {
+            arr = arr.sort(function (a, b) {
                 return a - b;
             });
         }
@@ -937,7 +937,7 @@ Loop.each({
      * @param {number} c One of the three numbers to compare.
      * @returns {number} The medium one.
      */
-    med: function(a, b, c) {
+    med: function (a, b, c) {
         return Math.mid([a, b, c]);
     },
     /**
@@ -947,7 +947,7 @@ Loop.each({
      * @param {number} k The scale of mixing.
      * @returns {number} The result of mixing.
      */
-    mix: function(a, b, k) {
+    mix: function (a, b, k) {
         return a * k + b * (1 - k);
     },
     /**
@@ -956,7 +956,7 @@ Loop.each({
      * @param {number} len The target length of the decimal part. (Default value is 0.)
      * @returns {number} The result.
      */
-    cut: function(num, len) {
+    cut: function (num, len) {
         if (typeof num !== 'number') {
             return NaN;
         }
@@ -980,7 +980,7 @@ Loop.each({
      * @param {number} y1 The y of the second point.
      * @returns {number} The distance.
      */
-    distance: function(x0, y0, x1, y1) {
+    distance: function (x0, y0, x1, y1) {
         return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
     },
     /**
@@ -989,7 +989,7 @@ Loop.each({
      * @param {{x: number, y: number}} p1 The second point.
      * @returns {number} The distance.
      */
-    distance_p: function(p0, p1) {
+    distance_p: function (p0, p1) {
         return Math.distance(p0.x, p0.y, p1.x, p1.y);
     },
     /**
@@ -1002,7 +1002,7 @@ Loop.each({
      * @param {number} z1 The z of the second point.
      * @returns {number} The distance.
      */
-    distance3d: function(x0, y0, z0, x1, y1, z1) {
+    distance3d: function (x0, y0, z0, x1, y1, z1) {
         return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2) + Math.pow(z0 - z1, 2));
     },
     /**
@@ -1011,11 +1011,23 @@ Loop.each({
      * @param {{x: number, y: number, z:number}} p1 The second point.
      * @returns {number} The distance.
      */
-    distance3d_p: function(p0, p1) {
+    distance3d_p: function (p0, p1) {
         return Math.distance3d(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
     }
-}, function(ext, key) {
+}, function (ext, key) {
     Math[key] = ext;
+});
+
+// extend Array
+Object.defineProperties(Array.prototype, {
+    /**
+     * @description Point to the first element of the array.
+     */
+    first: { get: function () { return this.length > 0 ? this[0] : undefined; } },
+    /**
+     * @description Point to the last element of the array.
+     */
+    last: { get: function () { return this.length > 0 ? this[this.length - 1] : undefined; } }
 });
 
 /** @description This object has some methods or constructors about DOM. */
@@ -1025,7 +1037,7 @@ var DOM = {
      * @param {string} str The abbr of the element.
      * @returns {Element} The element.
      */
-    create: function(str) {
+    create: function (str) {
         try {
             var tag = str.match(/^[\w\-]+/)[0],
                 ele = document.createElement(tag),
@@ -1057,7 +1069,7 @@ var DOM = {
      * @param {boolean} ignoreError Whether to ignore the errors. (If false, this method will return null on error.)
      * @returns {Array<Element>} The result of document.querySelectorAll.
      */
-    select: function(selector, ignoreError) {
+    select: function (selector, ignoreError) {
         try {
             return Array.from(document.querySelectorAll(selector));
         } catch (err) {
@@ -1076,17 +1088,17 @@ var DOM = {
      * @param {boolean} canBubble Whether the event can bubble.
      * @returns {boolean} Whether the event is successfully dispatched.
      */
-    trigger: function(ele, type, cancelable, canBubble) {
+    trigger: function (ele, type, cancelable, canBubble) {
         var e = document.createEvent('HTMLEvents');
         e.initEvent(type, canBubble, cancelable)
         return ele.dispatchEvent ? ele.dispatchEvent(e) : false;
     },
     // Equals to document.on('ready', $listener, $useCapture).
-    ready: function(listener, useCapture) {
+    ready: function (listener, useCapture) {
         return document.on('ready', listener, useCapture);
     },
     // Equals to window.listen('load', $listener, $useCapture).
-    load: function(listener, useCapture) {
+    load: function (listener, useCapture) {
         return window.listen('load', listener, useCapture);
     },
     /**
@@ -1095,21 +1107,21 @@ var DOM = {
      */
     CustomEvents: {
         // DOMContentLoaded
-        ready: function(ele, listener, useCapture) {
+        ready: function (ele, listener, useCapture) {
             if (/interactive|complete|loaded/.test(document.readyState)) {
                 document._DOMReady_ = true;
             }
             if (document._DOMReady_) {
                 setTimeout(listener);
             }
-            ele.listen('DOMContentLoaded', function(e) {
+            ele.listen('DOMContentLoaded', function (e) {
                 if (document._DOMReady_) {
                     return;
                 }
                 document._DOMReady_ = true;
                 listener();
             }, useCapture);
-            document.listen('readystatechange', function(e) {
+            document.listen('readystatechange', function (e) {
                 if (document._DOMReady_) {
                     return;
                 }
@@ -1118,7 +1130,7 @@ var DOM = {
                     listener();
                 }
             }, useCapture);
-            window.listen('load', function() {
+            window.listen('load', function () {
                 if (document._DOMReady_) {
                     return;
                 }
@@ -1127,9 +1139,9 @@ var DOM = {
             });
         },
         // value change
-        change: function(ele, listener, useCapture) {
+        change: function (ele, listener, useCapture) {
             var lastValue = NaN;
-            ele.listen('blur', function() {
+            ele.listen('blur', function () {
                 if (ele.value !== lastValue) {
                     listener();
                     lastValue = ele.value;
@@ -1137,37 +1149,37 @@ var DOM = {
             }, useCapture);
         },
         // pointer
-        pointerdown: function(ele, listener, useCapture) {
-            ele.listen('mousedown', function(e) {
+        pointerdown: function (ele, listener, useCapture) {
+            ele.listen('mousedown', function (e) {
                 e.x = e.clientX;
                 e.y = e.clientY;
                 listener.call(this, e);
             }, useCapture);
-            ele.listen('touchstart', function(e) {
+            ele.listen('touchstart', function (e) {
                 e.x = e.touches[0].clientX;
                 e.y = e.touches[0].clientY;
                 listener.call(this, e);
             }, useCapture);
         },
-        pointermove: function(ele, listener, useCapture) {
-            ele.listen('mousemove', function(e) {
+        pointermove: function (ele, listener, useCapture) {
+            ele.listen('mousemove', function (e) {
                 e.x = e.clientX;
                 e.y = e.clientY;
                 listener.call(this, e);
             }, useCapture);
-            ele.listen('touchmove', function(e) {
+            ele.listen('touchmove', function (e) {
                 e.x = e.touches[0].clientX;
                 e.y = e.touches[0].clientY;
                 listener.call(this, e);
             }, useCapture);
         },
-        pointerup: function(ele, listener, useCapture) {
-            ele.listen('mouseup', function(e) {
+        pointerup: function (ele, listener, useCapture) {
+            ele.listen('mouseup', function (e) {
                 e.x = e.clientX;
                 e.y = e.clientY;
                 listener.call(this, e);
             }, useCapture);
-            ele.listen('touchend', function(e) {
+            ele.listen('touchend', function (e) {
                 e.x = e.touches[0].clientX;
                 e.y = e.touches[0].clientY;
                 listener.call(this, e);
@@ -1193,13 +1205,13 @@ var Ani = {
      * @method ignoreType To ignore listeners of the type.
      * @method ignoreAll To ignore all the listeners.
      */
-    Frame: new Constructor(function() {
+    Frame: new Constructor(function () {
         var isRunning = false,
             lastUpdateTime = null,
             lastUpdateGap = null,
             lastFrameDuration = null,
             agency = new Agency();
-        var run = function() {
+        var run = function () {
             if (!isRunning || typeof this.fps !== 'number') {
                 return;
             }
@@ -1211,60 +1223,60 @@ var Ani = {
             agency.trigger('update', +new Date());
             var endTime = +new Date();
             lastFrameDuration = endTime - startTime;
-            setTimeout(this.usingRAF ? function() {
+            setTimeout(this.usingRAF ? function () {
                 requestAnimationFrame(run);
             } : run, Math.max(0, 1000 / this.fps - lastFrameDuration));
         }.bind(this);
         this.fps = 40;
         this.usingRAF = true;
-        this.start = function() {
+        this.start = function () {
             isRunning = true;
             agency.trigger('start', +new Date());
             setTimeout(run);
             return this;
         };
-        this.stop = function() {
+        this.stop = function () {
             isRunning = false;
             agency.trigger('stop', +new Date());
             return this;
         };
         Object.defineProperties(this, {
-            isRunning: { get: function() { return isRunning; } },
-            lastUpdateTime: { get: function() { return lastUpdateTime; } },
-            lastUpdateGap: { get: function() { return lastUpdateGap; } },
-            lastFrameDuration: { get: function() { return lastFrameDuration; } }
+            isRunning: { get: function () { return isRunning; } },
+            lastUpdateTime: { get: function () { return lastUpdateTime; } },
+            lastUpdateGap: { get: function () { return lastUpdateGap; } },
+            lastFrameDuration: { get: function () { return lastFrameDuration; } }
         });
-        Loop.each(['listen', 'listenOnce', 'ignore', 'ignoreType', 'ignoreAll'], function(m) {
-            this[m] = function() {
+        Loop.each(['listen', 'listenOnce', 'ignore', 'ignoreType', 'ignoreAll'], function (m) {
+            this[m] = function () {
                 agency[m].apply(agency, arguments);
                 return this;
             };
         }, this);
     }, {
-        /**
-         * @description To update the frame once.
-         * @returns {Ani.Frame} Self.
-         */
-        update: function() {
-            return this.listen('update', this.stop).start();
-        },
-        /**
-         * @description To set the fps.
-         * @param {number} fps The value.
-         * @returns {Ani.Frame} Self.
-         */
-        setFps: function(fps) {
-            this.fps = fps;
-            return this;
-        }
-    }),
+            /**
+             * @description To update the frame once.
+             * @returns {Ani.Frame} Self.
+             */
+            update: function () {
+                return this.listen('update', this.stop).start();
+            },
+            /**
+             * @description To set the fps.
+             * @param {number} fps The value.
+             * @returns {Ani.Frame} Self.
+             */
+            setFps: function (fps) {
+                this.fps = fps;
+                return this;
+            }
+        }),
     /**
      * @description To create a animation. (Will start it immediately.)
      * @param {number} fps The fps of the animation.
      * @param {Function} updater The updating function.
      * @returns {Ani.Frame} The animation.
      */
-    create: function(fps, updater) {
+    create: function (fps, updater) {
         var frame = new Ani.Frame();
         frame.fps = fps;
         return frame.listen('start', updater).start();
@@ -1282,7 +1294,7 @@ var Ani = {
      * @param {number} y1 y1.
      * @returns {(at: number) => number} The timing function.
      */
-    cubic: function(x0, y0, x1, y1) {
+    cubic: function (x0, y0, x1, y1) {
         var limit = Ani.cubicAccuracy;
         if (x0 > 1) {
             x0 = 1;
@@ -1294,7 +1306,7 @@ var Ani = {
         } else if (x1 < 0) {
             x1 = 0;
         }
-        var calc = function(t) {
+        var calc = function (t) {
             var x = [0, x0, x1, 1],
                 y = [0, y0, y1, 1],
                 c = 3;
@@ -1314,7 +1326,7 @@ var Ani = {
                 y: y[0]
             };
         };
-        var find = function(x, left, right) {
+        var find = function (x, left, right) {
             var mid = (left + right) / 2,
                 ans = calc(mid);
             if (Math.abs(ans.x - x) <= limit) {
@@ -1332,7 +1344,7 @@ var Ani = {
                 }
             }
         };
-        return function(at) {
+        return function (at) {
             return find(at, 0, 1);
         };
     },
@@ -1341,15 +1353,15 @@ var Ani = {
      * @param {number} at (now - start) / dur
      * @returns {number} The value.
      */
-    linear: function(at) {
+    linear: function (at) {
         return at;
     },
-    steps: function(count, start) {
+    steps: function (count, start) {
         start = start || false;
         var gap = 1 / count;
-        return start ? function(at) {
+        return start ? function (at) {
             return Math.ceil(at / gap) * gap;
-        } : function(at) {
+        } : function (at) {
             return Math.floor(at / gap) * gap;
         };
     }
@@ -1360,7 +1372,7 @@ Loop.each({
     easeIn: Ani.cubic(.42, 0, 1, 1),
     easeOut: Ani.cubic(0, 0, .58, 1),
     easeInOut: Ani.cubic(.42, 0, .58, 1)
-}, function(v, k) {
+}, function (v, k) {
     Ani[k] = v;
 });
 
@@ -1370,7 +1382,7 @@ Loop.each({
  * @param {Element} parent Another element.
  * @returns {Element} Self.
  */
-Element.prototype.appendTo = function(parent) {
+Element.prototype.appendTo = function (parent) {
     parent.appendChild(this);
     return this;
 };
@@ -1380,7 +1392,7 @@ Element.prototype.appendTo = function(parent) {
  * @param {string|undefined} value The value of the attribute.
  * @returns {string|Element} Return the value of the attribute if the value is not given, self otherwise.
  */
-Element.prototype.attr = function(name, value) {
+Element.prototype.attr = function (name, value) {
     if (arguments.length === 1) {
         return this.getAttribute(name);
     } else {
@@ -1394,7 +1406,7 @@ Element.prototype.attr = function(name, value) {
  * @param {string|undefined} value The value of the style.
  * @returns {string|Element} Return the value of the style if the value is not given, self otherwise.
  */
-Element.prototype.css = function(name, value) {
+Element.prototype.css = function (name, value) {
     if (arguments.length === 1) {
         return this.style[name];
     } else {
@@ -1406,7 +1418,7 @@ Element.prototype.css = function(name, value) {
  * @description To get the abbr of the element.
  * @returns {string} The abbr of the element.
  */
-Element.prototype.toAbbr = function() {
+Element.prototype.toAbbr = function () {
     var id = this.id,
         cls = Array.from(this.classList).join('.');
     return this.tagName.toLowerCase() + (id ? '#' + id : '') + (cls ? '.' + cls : '');
@@ -1416,7 +1428,7 @@ Element.prototype.toAbbr = function() {
  * @param {string} name The class name to add.
  * @returns {Element} Self.
  */
-Element.prototype.addClass = function(name) {
+Element.prototype.addClass = function (name) {
     var classes = this.attr('class');
     if (!classes) {
         this.attr('class', name);
@@ -1434,9 +1446,9 @@ Element.prototype.addClass = function(name) {
  * @param {string} name The class to remove.
  * @returns {Element} Self.
  */
-Element.prototype.delClass = function(name) {
+Element.prototype.delClass = function (name) {
     var classArr = (this.attr('class') || '').split(' ');
-    classArr = Loop.filter(classArr, function(c) {
+    classArr = Loop.filter(classArr, function (c) {
         return c !== name;
     });
     this.attr('class', classArr.join(' '));
@@ -1447,7 +1459,7 @@ Element.prototype.delClass = function(name) {
  * @param {boolean} disabled Whether the element should be disabled. If the value is not given, the method will change the value from true to false (or: from true to false).
  * @returns {Element} Self.
  */
-Element.prototype.disable = function(disabled) {
+Element.prototype.disable = function (disabled) {
     this.disabled = disabled === undefined ? disabled : !this.disabled;
     return this;
 };
@@ -1456,7 +1468,7 @@ Element.prototype.disable = function(disabled) {
  * @param {string} value The innerHTML value to replace.
  * @returns {Element|string}  If the value is not given, the method will return the innerHTML, the element otherwise.
  */
-Element.prototype.html = function(value) {
+Element.prototype.html = function (value) {
     if (arguments.length === 0) {
         return this.innerHTML;
     } else {
@@ -1468,7 +1480,7 @@ Element.prototype.html = function(value) {
  * @description To hide the element.
  * @returns {Element} Self.
  */
-Element.prototype.hide = function() {
+Element.prototype.hide = function () {
     return this.css('display', 'none');
 };
 /**
@@ -1476,7 +1488,7 @@ Element.prototype.hide = function() {
  * @param {string} display The value of the css attribute 'display' of the element.
  * @returns {Element} Self.
  */
-Element.prototype.show = function(display) {
+Element.prototype.show = function (display) {
     display = display || 'block';
     return this.css('display', display);
 };
@@ -1484,21 +1496,21 @@ Element.prototype.show = function(display) {
  * @description To remove the element.
  * @returns {Element} Self.
  */
-Element.prototype.remove = function() {
+Element.prototype.remove = function () {
     return this.parentNode.removeChild(this);
 };
 /**
  * @description To get the generation of the element.
  * @returns {Element} Self.
  */
-Element.prototype.generation = function() {
+Element.prototype.generation = function () {
     return this.parentNode.children;
 };
 /**
  * @description To get the previous element.
  * @returns {Element|null} Previous element if exists, null otherwise.
  */
-Element.prototype.prev = function() {
+Element.prototype.prev = function () {
     var c = this.parentNode.children,
         i = Array.from(c).indexOf(this);
     return i === 0 ? null : c[i - 1];
@@ -1507,7 +1519,7 @@ Element.prototype.prev = function() {
  * @description To get the next element.
  * @returns {Element|null} Next element if exists, null otherwise.
  */
-Element.prototype.next = function() {
+Element.prototype.next = function () {
     var c = this.parentNode.children,
         i = Array.from(c).indexOf(this);
     return i === c.length - 1 ? null : c[i + 1];
@@ -1518,7 +1530,7 @@ Element.prototype.next = function() {
  * @param {number|undefined} offsetY The offset y. Will set to offsetX if the value is not given.
  * @returns {Element} Self.
  */
-Element.prototype.scroll = function(offsetX, offsetY) {
+Element.prototype.scroll = function (offsetX, offsetY) {
     if (offsetY === undefined) {
         offsetY = offsetX;
     }
@@ -1532,7 +1544,7 @@ Element.prototype.scroll = function(offsetX, offsetY) {
  * @param {Element} parent The parent element.
  * @returns {Element} Self.
  */
-Element.prototype.insertTo = function(index, parent) {
+Element.prototype.insertTo = function (index, parent) {
     parent.insertBefore(this, parent.children[index]);
     return this;
 };
@@ -1542,7 +1554,7 @@ Element.prototype.insertTo = function(index, parent) {
  * @param {Element} child The child element.
  * @returns {Element} Self.
  */
-Element.prototype.insertChild = function(index, child) {
+Element.prototype.insertChild = function (index, child) {
     this.insertBefore(child, this.children[index]);
     return this;
 };
@@ -1551,7 +1563,7 @@ Element.prototype.insertChild = function(index, child) {
  * @param {number} gap The gap between the bounding client rect of the element and the view. (default value is 0.)
  * @returns {Element} Self.
  */
-Element.prototype.isSeen = function(gap) {
+Element.prototype.isSeen = function (gap) {
     if (typeof gap !== 'number') {
         gap = 0;
     }
@@ -1569,7 +1581,7 @@ Element.prototype.isSeen = function(gap) {
  * @param {string|undefined} val The value to set.
  * @returns {string|Element} Self if the value is given, the value of the element otherwise.
  */
-Element.prototype.val = function(val) {
+Element.prototype.val = function (val) {
     if (arguments.length === 0) {
         return this.value;
     }
@@ -1582,7 +1594,7 @@ Element.prototype.val = function(val) {
  * @param {{style: string, from: number, to: number, dur: number, fps: number, unit: string, fn: (at: number) => number, transferer: (value: any) => any}} config The config.
  * @returns {Ani.Frame} The animation.
  */
-Element.prototype.ani = function(config) {
+Element.prototype.ani = function (config) {
     var ele = this,
         frame = new Ani.Frame(),
         from = config.from,
@@ -1615,18 +1627,18 @@ Element.prototype.ani = function(config) {
         fn = Ani.linear;
     }
     frame.fps = 50;
-    frame.listen('update', function(now) {
+    frame.listen('update', function (now) {
         var value = Math.med(from, from + (to - from) * fn((now - startTime) / dur), to) + unit;
         if (transferer) {
             value = transferer(value);
         }
         ele.style[style] = value;
     });
-    frame.listen('stop', function() {
+    frame.listen('stop', function () {
         ele.style[style] = to + unit;
     });
     setTimeout(frame.stop, dur);
-    frame.ele = function() {
+    frame.ele = function () {
         return ele;
     };
     return frame.start();
@@ -1636,7 +1648,7 @@ Element.prototype.ani = function(config) {
  * @param {{dur: number, fps: number, fn: (at: number) => number}} config The config.
  * @returns {Element} Self.
  */
-Element.prototype.fadeOut = function(config) {
+Element.prototype.fadeOut = function (config) {
     var ele = this;
     config = config || {};
     return this.ani({
@@ -1647,7 +1659,7 @@ Element.prototype.fadeOut = function(config) {
         fps: config.fps || 32,
         dur: config.dur || 1000,
         fn: config.fn
-    }).listen('stop', function() {
+    }).listen('stop', function () {
         ele.hide();
     });
 };
@@ -1656,7 +1668,7 @@ Element.prototype.fadeOut = function(config) {
  * @param {{dur: number, fps: number, display: string, fn: (at: number) => number}} config The config.
  * @returns {Element} Self.
  */
-Element.prototype.fadeIn = function(config) {
+Element.prototype.fadeIn = function (config) {
     var ele = this;
     config = config || {};
     ele.show(config.display || 'block');
@@ -1675,7 +1687,7 @@ Loop.each([
     Element,
     Document,
     Window
-], function(O) {
+], function (O) {
     /**
      * @description To add a listener to the object.
      * @param {string} type Event type.
@@ -1683,10 +1695,10 @@ Loop.each([
      * @param {boolean} useCapture Whether to use capture.
      * @returns {O} Self.
      */
-    O.prototype.listen = O.prototype.addEventListener === undefined ? function(type, listener) {
+    O.prototype.listen = O.prototype.addEventListener === undefined ? function (type, listener) {
         this['on' + type] = listener;
         return this;
-    } : function(type, listener, useCapture) {
+    } : function (type, listener, useCapture) {
         this.addEventListener(type, listener, useCapture);
         return this;
     };
@@ -1697,13 +1709,13 @@ Loop.each([
      * @param {boolean} useCapture Whether to use capture.
      * @returns {O} Self.
      */
-    O.prototype.ignore = O.prototype.removeEventListener === undefined ? function(type, listener) {
+    O.prototype.ignore = O.prototype.removeEventListener === undefined ? function (type, listener) {
         type = 'on' + type;
         if (this[type] === listener) {
             this[type] = null;
         }
         return this;
-    } : function(type, listener, useCapture) {
+    } : function (type, listener, useCapture) {
         this.removeEventListener(type, listener, useCapture);
         return this;
     };
@@ -1715,7 +1727,7 @@ Loop.each([
          * @param {boolean} useCapture Whether to use capture.
          * @returns {O} Self.
          */
-        on: function(type, listener, useCapture) {
+        on: function (type, listener, useCapture) {
             if (type in DOM.CustomEvents) {
                 DOM.CustomEvents[type](this, listener, useCapture);
             } else {
@@ -1730,10 +1742,10 @@ Loop.each([
          * @param {boolean} canBubble Whether the event can bubble.
          * @returns {boolean} Whether the event is successfully dispatched.
          */
-        trigger: function(type, cancelable, canBubble) {
+        trigger: function (type, cancelable, canBubble) {
             return DOM.trigger(this, type, cancelable, canBubble);
         }
-    }, function(ext, key) {
+    }, function (ext, key) {
         O.prototype[key] = ext;
     });
 });
@@ -1754,12 +1766,12 @@ var Ajax = {
      * @property {number} finishTime The finish time of the request.
      * @property {number} status The status of the request.
      */
-    Result: new Constructor(function(e, start, end) {
+    Result: new Constructor(function (e, start, end) {
         Object.defineProperties(this, {
             e: { value: e },
             request: { value: e.target },
             response: {
-                get: function() {
+                get: function () {
                     return e.target.response;
                 }
             },
@@ -1768,21 +1780,21 @@ var Ajax = {
             status: { value: e.target.status }
         });
     }, {
-        /**
-         * @description The method that tries to transfer the response to object.
-         * @returns {Promise} The promise which tells whether the transference is successful.
-         */
-        json: function() {
-            var result = this;
-            return new Promise(function(resolve, reject) {
-                try {
-                    resolve(JSON.parse(result.response));
-                } catch (err) {
-                    reject(err);
-                }
-            });
-        }
-    }),
+            /**
+             * @description The method that tries to transfer the response to object.
+             * @returns {Promise} The promise which tells whether the transference is successful.
+             */
+            json: function () {
+                var result = this;
+                return new Promise(function (resolve, reject) {
+                    try {
+                        resolve(JSON.parse(result.response));
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            }
+        }),
     /**
      * @description The config of ajax request.
      * @param {string} url The url of the request.
@@ -1797,7 +1809,7 @@ var Ajax = {
      * @property {boolean} transferData Whether to transfer the data.
      * @property {boolean} transferResult Whether to transfer the result.
      */
-    Config: new Constructor(function(url) {
+    Config: new Constructor(function (url) {
         this.method = 'GET';
         this.url = url || null;
         this.data = '';
@@ -1809,30 +1821,30 @@ var Ajax = {
         this.transferResult = true;
         this.params = {};
     }, {
-        /**
-         * @description To set config by an object.
-         * @param {Ajax.Config} settings Settings of the config.
-         * @returns {Ajax.Config} Self.
-         */
-        set: function(settings) {
-            Loop.each(settings, function(v, k) {
-                if (k in this) {
-                    this[k] = v;
-                }
-            }, this);
-            return this;
-        }
-    }),
+            /**
+             * @description To set config by an object.
+             * @param {Ajax.Config} settings Settings of the config.
+             * @returns {Ajax.Config} Self.
+             */
+            set: function (settings) {
+                Loop.each(settings, function (v, k) {
+                    if (k in this) {
+                        this[k] = v;
+                    }
+                }, this);
+                return this;
+            }
+        }),
     /** 
      * @description This method sends an XMLHttpRequest and returns a promise.
      * @param {Ajax.Config} config Settings about the request.
      * @returns {Promise} The promise which tells whether the request is successful.
      */
-    send: function(config) {
+    send: function (config) {
         if (!(window.XMLHttpRequest && config && (config instanceof Object) && config.url)) {
             return;
         }
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             config = (new Ajax.Config()).set(config);
             try {
                 var xhr = new XMLHttpRequest();
@@ -1843,7 +1855,7 @@ var Ajax = {
                 xhr.onabort = reject;
                 xhr.onerror = reject;
                 xhr.ontimeout = reject;
-                xhr.onload = function(e) {
+                xhr.onload = function (e) {
                     if (xhr.status == 200) {
                         resolve(config.transferResult === false ? e : new Ajax.Result(e, startTime, +new Date()));
                     } else {
@@ -1865,7 +1877,7 @@ var Ajax = {
      * @param {string} url The url.
      * @returns {{href: string, src: string, protocol: string, hash: string, file: string, prot: string, host: string, get_a: () => HTMLAnchorElement, args: {[key: string]: string, ext: string}}} The result.
      */
-    parseURL: function(url) {
+    parseURL: function (url) {
         url = url || document.URL;
         var o = {},
             index = -1,
@@ -1890,7 +1902,7 @@ var Ajax = {
             o.host.splice(index);
             o.host = o.host.join('');
         }
-        o.get_a = function() {
+        o.get_a = function () {
             return a;
         };
         var args = a.search.slice(1).split('&');
@@ -1909,7 +1921,7 @@ var Ajax = {
      * @param {{[key: string]: string}} params The params.
      * @returns {string} The result.
      */
-    joinParams: function(url, params) {
+    joinParams: function (url, params) {
         if (arguments.length === 0) {
             return null;
         } else if (arguments.length === 1) {
@@ -1918,7 +1930,7 @@ var Ajax = {
         }
         url += url.indexOf('?') === -1 ? '?' : '&';
         var i = 0;
-        Loop.each(params, function(value, key) {
+        Loop.each(params, function (value, key) {
             if (i++ > 0) {
                 url += '&';
             }
@@ -1942,11 +1954,11 @@ var Script = {
      * @param {boolean} useIncludePath Whether to use the include path.
      * @returns {Promise} The promise tells whether the script file has loaded successfully.
      */
-    loadOne: function(url, type, useIncludePath) {
+    loadOne: function (url, type, useIncludePath) {
         if (typeof url !== 'string') {
             return;
         }
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             try {
                 type = type || 'text/javascript';
                 if (useIncludePath !== false) {
@@ -1971,17 +1983,17 @@ var Script = {
      * @param {boolean} useIncludePath Whether to use the include path.
      * @returns {Promise} The promise tells whether all the script files have loaded successfully.
      */
-    loadSome: function(urls, sequentially, type, useIncludePath) {
+    loadSome: function (urls, sequentially, type, useIncludePath) {
         if (sequentially === true) {
             var promise = Promise.resolve();
-            Loop.each(urls, function(url) {
-                promise = promise.then(function() {
+            Loop.each(urls, function (url) {
+                promise = promise.then(function () {
                     return Script.loadOne(url, type, useIncludePath);
                 });
             });
             return promise;
         } else {
-            return Promise.all(Loop.map(urls, function(url) {
+            return Promise.all(Loop.map(urls, function (url) {
                 return Script.loadOne(url, type, useIncludePath);
             }));
         }
@@ -1993,10 +2005,10 @@ var Script = {
      * @param {boolean} useIncludePath Whether to use the include path.
      * @returns {Promise} The promise tells whether all the script file groups have loaded successfully.
      */
-    loadGroup: function(urls, type, useIncludePath) {
+    loadGroup: function (urls, type, useIncludePath) {
         var promise = Promise.resolve();
-        Loop.each(urls, function(url) {
-            promise = promise.then(function() {
+        Loop.each(urls, function (url) {
+            promise = promise.then(function () {
                 return Script.loadSome(url, false, type, useIncludePath);
             });
         });
@@ -2005,12 +2017,12 @@ var Script = {
 };
 
 /** @description This object has some methods about extensions. */
-var Extension = (function() {
+var Extension = (function () {
     var exportations = {},
         waiters = [];
-    var checkWaiters = function() {
+    var checkWaiters = function () {
         var _waiters = [];
-        waiters.forEach(function(w) {
+        waiters.forEach(function (w) {
             if (!w()) {
                 _waiters.push(w);
             }
@@ -2025,7 +2037,7 @@ var Extension = (function() {
      * @param {any} value The value.
      * @returns {boolean} Whether it is successfully exported.
      */
-    o.export = function(name, value) {
+    o.export = function (name, value) {
         if (name in exportations) {
             return false;
         }
@@ -2041,7 +2053,7 @@ var Extension = (function() {
      * @param {string} name The name of the extension.
      * @returns {any} The extension if exists, null otherwise.
      */
-    o.import = function(name) {
+    o.import = function (name) {
         if (name in exportations) {
             return exportations[name];
         }
@@ -2054,8 +2066,8 @@ var Extension = (function() {
      * @param {Function} definer The function defines the extension.
      * @returns {boolean} Whether it is executed at once.
      */
-    o.define = function(name, need, definer) {
-        return o.need(need, function() {
+    o.define = function (name, need, definer) {
+        return o.need(need, function () {
             o.export(name, definer.apply(this, arguments));
         });
     };
@@ -2065,11 +2077,11 @@ var Extension = (function() {
      * @param {Function} callback The callback.
      * @returns {boolean} Whether it is executed at once.
      */
-    o.need = function(need, callback) {
+    o.need = function (need, callback) {
         var requirements = new Array(need.length);
         for (var i = 0; i < need.length; i++) {
             if (!(need[i] in exportations)) {
-                waiters.push(function() {
+                waiters.push(function () {
                     for (var i = 0; i < need.length; i++) {
                         if (!(need[i] in exportations)) {
                             return false;
