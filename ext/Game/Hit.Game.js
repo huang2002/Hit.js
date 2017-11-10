@@ -410,3 +410,67 @@ Extension.export('Vector',
         }
     )
 );
+
+/**
+ * @description The constructor of positions.
+ * @property {number} x x.
+ * @property {number} y y.
+ */
+Extension.export('Position',
+    new Constructor(
+        function (x, y) {
+            this.x = x;
+            this.y = y;
+            if (arguments.length >= 2) {
+                this.set(x, y);
+            }
+        }, {
+            /**
+             * @description To set the position to p.
+             * @param {Position} p p.
+             * @returns {Position} Self.
+             */
+            setVec: function (p) {
+                return this.set(p.x, p.y);
+            },
+            /**
+             * @description To set the position.
+             * @param {number} x x.
+             * @param {number} y y.
+             * @returns {Position} Self.
+             */
+            set: function (x, y) {
+                if (typeof x === 'number') {
+                    this.x = x;
+                }
+                if (typeof y === 'number') {
+                    this.y = y;
+                }
+                return this;
+            },
+            /**
+             * @description To let the position translate by x&y.
+             * @param {number} x x.
+             * @param {number} y y.
+             * @returns {Position} Self.
+             */
+            translate: function (x, y) {
+                if (typeof x === 'number') {
+                    this.x += x;
+                }
+                if (typeof y === 'number') {
+                    this.y += y;
+                }
+                return this;
+            },
+            /**
+             * @description To add v to the position.
+             * @param {Position} v v.
+             * @returns {Position} Self.
+             */
+            addVec: function (v) {
+                return this.add(v.x, v.y);
+            }
+        }
+    )
+);
