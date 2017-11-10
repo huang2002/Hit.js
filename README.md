@@ -113,6 +113,7 @@ In the folder `ext`, you will find various extensions, and They export(using `Ex
     - msgBox
 - ext\range-input\Hit.range-input.js
 - ext\range-value\Hit.range-value.js
+- ext\Canvas\Hit.Canvas.js
 
 ## Try it :D
 

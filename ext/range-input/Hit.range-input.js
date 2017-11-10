@@ -2,13 +2,10 @@
  * @file Hit.range-input.js
  * @see https://github.com/huang2002/Hit.js
  * @author hhh
+ * @overview These scripts will detect the range inputs without attribute "data-range-ignore" and replace them with custom range inputs. The new range input will be: div.range{ div.range-inner{ div.range-thumb } }, and the original input will be hidden and receive the value so that you can just operate the range input.
  */
-
-/**
- * @description To replace all the range inputs without attribute "data-range-ignore" with custom range inputs. The new range input will be: div.range{ div.range-inner{ div.range-thumb } }, and the original input will be hidden and receive the value so that you can just operate the range input.
- */
-DOM.load(function() {
-    Loop.each(DOM.select('input'), function(input) {
+DOM.load(function () {
+    Loop.each(DOM.select('input'), function (input) {
         if (input.type.toLowerCase() !== 'range' || input.attr('data-range-ignore')) {
             return;
         }
@@ -16,17 +13,17 @@ DOM.load(function() {
             inner = DOM.create('dib.range-inner').appendTo(outer),
             thumb = DOM.create('div.range-thumb').appendTo(inner);
         var isActive = false;
-        var startInput = function(e) {
+        var startInput = function (e) {
             e.preventDefault();
             e.stopPropagation();
             input.trigger('focus');
             isActive = true;
         };
-        var stopInput = function() {
+        var stopInput = function () {
             isActive = false;
             input.trigger('blur');
         };
-        var inputValue = function(e) {
+        var inputValue = function (e) {
             if (!isActive) {
                 return;
             }
@@ -47,7 +44,7 @@ DOM.load(function() {
         };
         outer.listen('pointerdown', startInput);
         window.listen('pointermove', inputValue);
-        outer.listen('click', function(e) {
+        outer.listen('click', function (e) {
             startInput(e);
             inputValue(e);
             stopInput();

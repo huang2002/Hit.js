@@ -3,6 +3,7 @@
  * @see https://github.com/huang2002/Hit.js
  * @requires OC.js (https://github.com/huang2002/ObjectiveCanvas.js)
  * @author hhh
+ * @overview This file defined some constructors about 2D games, and you can use them to make you 2D games.
  */
 
 if (!('OC' in window)) {
@@ -93,6 +94,9 @@ Extension.export('Game-Controller',
             });
             this.listenType = function (type) {
                 window.listen(type, function (e) {
+                    if (!self.frame.isRunning) {
+                        return;
+                    }
                     var pos = 'touches' in e ? e.touches[0] : e,
                         x = game.UI.toGameX(pos.clientX),
                         y = game.UI.toGameY(pos.clientY),
