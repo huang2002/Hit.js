@@ -59,6 +59,7 @@ It is a javascript lib which not only defines some useful methods and constructo
     - define
 
 ### Some newly-defined methods:
+
 - Element.prototype.
     - attr
     - css
@@ -93,6 +94,25 @@ It is a javascript lib which not only defines some useful methods and constructo
     - distance_p
     - distance3d
     - distance3d_p
+
+## Extensions
+
+In the folder `ext`, you will find various extensions, and They export(using `Extension.*`) different things. You can read the comments in each file to learn what they exported and use `Extension.*` to employ them.
+
+### Some extensions:
+
+- ext\Game\Hit.Game.js
+    - Game-UI
+    - Game-Controller
+    - Game-Scene
+    - Vector
+    - Position
+- ext\LocalStore\Hit.LocalStore.js
+    - LocalStore
+- ext\msgBox\Hit.msgBox.js
+    - msgBox
+- ext\range-input\Hit.range-input.js
+- ext\range-value\Hit.range-value.js
 
 ## Try it :D
 

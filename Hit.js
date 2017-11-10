@@ -941,13 +941,16 @@ Loop.each({
         return Math.mid([a, b, c]);
     },
     /**
-     * @description To get the result of a*k+b*(1-k).
+     * @description To get the result of a*k+b*(1-k). (k >= 0 && k <= 1)
      * @argument {number} a One number to mix.
      * @argument {number} b Another number to mix.
-     * @param {number} k The scale of mixing.
+     * @param {number} k The ratio of mixing.
      * @returns {number} The result of mixing.
      */
     mix: function (a, b, k) {
+        if (k > 1 || k < 0) {
+            return NaN;
+        }
         return a * k + b * (1 - k);
     },
     /**
