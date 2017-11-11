@@ -18,7 +18,7 @@ Loop.each({
     mosaic: function (x, y, w, h, size) {
         if (arguments.length <= 1) {
             var canvas = this.canvas;
-            return this.mosaic(0, 0, canvas.width, canvas.width, arguments[0]);
+            return this.mosaic(0, 0, canvas.width, canvas.height, arguments[0]);
         }
         if (typeof size !== 'number' || size <= 0) {
             size = 10;
@@ -39,15 +39,15 @@ Loop.each({
                     p, k, px, py, offset;
                 for (p = 0; p < size; p++) {
                     px = rx + p;
-                    if (px > w) {
+                    if (px >= w) {
                         continue;
                     }
                     for (k = 0; k < size; k++) {
                         py = ry + k;
-                        if (py > h) {
+                        if (py >= h) {
                             continue;
                         }
-                        offset = (px * w + py) * 4;
+                        offset = (py * w + px) * 4;
                         r += data[offset];
                         g += data[offset + 1];
                         b += data[offset + 2];
@@ -61,15 +61,15 @@ Loop.each({
                 a = Math.round(a / count);
                 for (p = 0; p < size; p++) {
                     px = rx + p;
-                    if (px > w) {
+                    if (px >= w) {
                         continue;
                     }
                     for (k = 0; k < size; k++) {
                         py = ry + k;
-                        if (py > h) {
+                        if (py >= h) {
                             continue;
                         }
-                        offset = (px * w + py) * 4;
+                        offset = (py * w + px) * 4;
                         data[offset] = r;
                         data[offset + 1] = g;
                         data[offset + 2] = b;
