@@ -1032,6 +1032,31 @@ Object.defineProperties(Array.prototype, {
      */
     last: { get: function () { return this.length > 0 ? this[this.length - 1] : undefined; } }
 });
+Loop.each({
+    /**
+     * @description To split an array.
+     * @param {number}
+     */
+    split: function (len, cut) {
+        if (typeof len !== 'number' || len <= 0 || len % 1 !== 0 || len >= this.length) {
+            return [Array.from(this)];
+        }
+        var ans = [],
+            l = Math[cut !== false ? 'floor' : 'ceil'](this.length / len) * len;
+        for (var i = 0; i < l; i += len) {
+            ans.push([]);
+            for (var j = 0; j < len; j++) {
+                if (i + j >= this.length) {
+                    break;
+                }
+                ans.last.push(this[i + j]);
+            }
+        }
+        return ans;
+    }
+}, function (v, k) {
+    Array.prototype[k] = v;
+});
 
 /** @description This object has some methods or constructors about DOM. */
 var DOM = {

@@ -79,6 +79,31 @@ Loop.each({
             }
         }
         this.putImageData(imgData, x, y);
+    },
+    /**
+     * @description To get the pixels of area(x, y, w, h).
+     * @param {number} x The x.
+     * @param {number} y The y.
+     * @param {number} w The w.
+     * @param {number} h The h.
+     * @returns {Array<{r: number, g:number, b:number, a:number}>} The array of the pixels.
+     */
+    getPixels: function (x, y, w, h) {
+        if (arguments.length === 0) {
+            var canvas = this.canvas;
+            return this.getPixels(0, 0, canvas.width, canvas.height);
+        }
+        var data = this.getImageData(x, y, w, h).data,
+            ans = [];
+        for (var i = 0; i < data.length / 4; i += 4) {
+            ans.push({
+                r: data[i],
+                g: data[i + 1],
+                b: data[i + 2],
+                a: data[i + 3]
+            });
+        }
+        return ans;
     }
 }, function (v, k) {
     CanvasRenderingContext2D.prototype[k] = v;
