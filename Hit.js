@@ -545,9 +545,9 @@ if (!('setImmediate' in window)) {
 }
 
 // fix requestAnimationFrame
-if (!('requestAnimationFrame') in window) {
+if (!('requestAnimationFrame' in window)) {
     window.requestAnimationFrame = function (handler) {
-        return setTimeout(handler, 15);
+        return setTimeout(handler, 16);
     };
     window.cancelAnimationFrame = window.clearTimeout;
 }
