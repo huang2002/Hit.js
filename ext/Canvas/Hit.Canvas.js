@@ -104,6 +104,30 @@ Loop.each({
             });
         }
         return ans;
+    },
+    /**
+     * @description To clear the canvas.
+     * @param {number} ratio The ratio.
+     * @returns {undefined}
+     */
+    clr: function (ratio) {
+        if (typeof ratio !== ' number') {
+            ratio = 1;
+        }
+        var c = this.canvas;
+        this.clearRect(0, 0, c.width * ratio, c.height * ratio);
+    },
+    /**
+     * @description To fill the canvas.
+     * @param {number} ratio The ratio.
+     * @returns {undefined}
+     */
+    fill: function (ratio) {
+        if (typeof ratio !== ' number') {
+            ratio = 1;
+        }
+        var c = this.canvas;
+        this.fillRect(0, 0, c.width * ratio, c.height * ratio);
     }
 }, function (v, k) {
     CanvasRenderingContext2D.prototype[k] = v;

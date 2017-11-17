@@ -179,6 +179,45 @@ var Compare = {
     }
 };
 
+//#region - extend objects
+
+// Object
+Loop.each({
+    /**
+     * @description To mix the objects into one object.
+     * @param {Array<Object>} objArr The array of objects to mix.
+     * @returns {Object} The result object.
+     */
+    concat: function (objArr) {
+        var ans = {};
+        Loop.each(objArr, function (obj) {
+            ans.set(obj);
+        });
+        return ans;
+    }
+}, function (v, k) {
+    Object[k] = v;
+});
+
+// objects
+Loop.each({
+    /**
+     * @description To set properties of the object.
+     * @param {Object} obj The object describes the properties.
+     * @returns {Object} Self.
+     */
+    set: function (obj) {
+        Loop.each(obj, function (v, k) {
+            this[k] = v;
+        }, this);
+        return this;
+    }
+}, function (v, k) {
+    Object.prototype[k] = v;
+});
+
+//#endregion
+
 // extend functions
 Loop.each({
     /**
@@ -232,10 +271,11 @@ Loop.each({
  * @description The constructor of object pools.
  * @param {Function} constructor The constructor of the objects in the pool.
  */
-var ObjectPool = new Constructor(function (constructor) {
-    Object.defineProperty(this, 'constructor', { value: constructor || Object });
-    this._pool = [];
-}, {
+var ObjectPool = new Constructor(
+    function (constructor) {
+        Object.defineProperty(this, 'constructor', { value: constructor || Object });
+        this._pool = [];
+    }, {
         /**
          * @description To get an object from the pool. If there's not any object, will create a new object from the constructor.
          * @returns {this.constructor} An object.
@@ -286,21 +326,23 @@ var ObjectPool = new Constructor(function (constructor) {
             this._pool = [];
             return p;
         }
-    });
+    }
+);
 
 /**
  * @description The constructor of sequences.
  * @param {number} delay The delay.
  * @param {Function} callback The callback.
  */
-var Sequence = new Constructor(function (delay, callback) {
-    this._callbacks = [];
-    this._delays = [];
-    this._offset = 0;
-    if (callback && delay !== undefined) {
-        this.next(delay, callback);
-    }
-}, {
+var Sequence = new Constructor(
+    function (delay, callback) {
+        this._callbacks = [];
+        this._delays = [];
+        this._offset = 0;
+        if (callback && delay !== undefined) {
+            this.next(delay, callback);
+        }
+    }, {
         /**
          * @description To set the next callback and delay.
          * @param {number} delay The delay.
@@ -322,7 +364,8 @@ var Sequence = new Constructor(function (delay, callback) {
                 return setTimeout(callback, this._delays[i]);
             }, this);
         }
-    });
+    }
+);
 /**
  * @description To create a new sequence.
  * @param {number} delay The delay.
@@ -575,11 +618,12 @@ if (!('stopPropagation' in Event.prototype)) {
  * @property {ChainNode} next Next node.
  * @property {any} value The value of the node.
  */
-var ChainNode = new Constructor(function (value) {
-    this.next = null;
-    this.prev = null;
-    this.value = value;
-}, {
+var ChainNode = new Constructor(
+    function (value) {
+        this.next = null;
+        this.prev = null;
+        this.value = value;
+    }, {
         /**
          * @description To insert a node after the node.
          * @param {ChainNode} node The node to insert.
@@ -642,7 +686,8 @@ var ChainNode = new Constructor(function (value) {
                 this.next = null;
             }
         }
-    });
+    }
+);
 /**
  * @description To check if the object is a node or a node like.
  * @returns {boolean} The result.
@@ -656,16 +701,17 @@ ChainNode.check = function (obj) {
  * @property {ChainNode} tail The last node.
  * @property {ChainNode} pointer The pointer.
  */
-var Chain = new Constructor(function (initialVal) {
-    this.head = null;
-    this.tail = null;
-    this.pointer = null;
-    if (initialVal) {
-        Loop.each(initialVal, function (val) {
-            this.append(new ChainNode(val));
-        }, this);
-    }
-}, {
+var Chain = new Constructor(
+    function (initialVal) {
+        this.head = null;
+        this.tail = null;
+        this.pointer = null;
+        if (initialVal) {
+            Loop.each(initialVal, function (val) {
+                this.append(new ChainNode(val));
+            }, this);
+        }
+    }, {
         /**
          * @description To count the nodes of the chain.
          * @returns {number} The length of the chain.
@@ -756,7 +802,8 @@ var Chain = new Constructor(function (initialVal) {
             }
             return this;
         }
-    });
+    }
+);
 /**
  * @description The max length of a chain.
  * @type {number}
@@ -769,11 +816,12 @@ Chain.maxLen = 99999;
  * @description The constructor of agencies.
  * @property {boolean} cache Whether to store the trigger action without being executed at once.
  */
-var Agency = new Constructor(function () {
-    this._listeners = {};
-    this._caches = {};
-    this.cache = false;
-}, {
+var Agency = new Constructor(
+    function () {
+        this._listeners = {};
+        this._caches = {};
+        this.cache = false;
+    }, {
         /**
          * @description To trigger the listeners listening at the type.
          * @param {string} type The type.
@@ -897,7 +945,8 @@ var Agency = new Constructor(function () {
                 return false;
             }
         }
-    });
+    }
+);
 /**
  * @description To add a new agency to the object. ($obj._agency)
  * @param {Object} obj The object.
@@ -1233,54 +1282,55 @@ var Ani = {
      * @method ignoreType To ignore listeners of the type.
      * @method ignoreAll To ignore all the listeners.
      */
-    Frame: new Constructor(function () {
-        var isRunning = false,
-            lastUpdateTime = null,
-            lastUpdateGap = null,
-            lastFrameDuration = null,
-            agency = new Agency();
-        var run = function () {
-            if (!isRunning || typeof this.fps !== 'number') {
-                return;
-            }
-            var startTime = +new Date();
-            if (lastUpdateTime) {
-                lastUpdateGap = startTime - lastUpdateTime;
-            }
-            lastUpdateTime = startTime;
-            agency.trigger('update', +new Date());
-            var endTime = +new Date();
-            lastFrameDuration = endTime - startTime;
-            setTimeout(this.usingRAF ? function () {
-                requestAnimationFrame(run);
-            } : run, Math.max(0, 1000 / this.fps - lastFrameDuration));
-        }.bind(this);
-        this.fps = 40;
-        this.usingRAF = true;
-        this.start = function () {
-            isRunning = true;
-            agency.trigger('start', +new Date());
-            setTimeout(run);
-            return this;
-        };
-        this.stop = function () {
-            isRunning = false;
-            agency.trigger('stop', +new Date());
-            return this;
-        };
-        Object.defineProperties(this, {
-            isRunning: { get: function () { return isRunning; } },
-            lastUpdateTime: { get: function () { return lastUpdateTime; } },
-            lastUpdateGap: { get: function () { return lastUpdateGap; } },
-            lastFrameDuration: { get: function () { return lastFrameDuration; } }
-        });
-        Loop.each(['listen', 'listenOnce', 'ignore', 'ignoreType', 'ignoreAll'], function (m) {
-            this[m] = function () {
-                agency[m].apply(agency, arguments);
+    Frame: new Constructor(
+        function () {
+            var isRunning = false,
+                lastUpdateTime = null,
+                lastUpdateGap = null,
+                lastFrameDuration = null,
+                agency = new Agency();
+            var run = function () {
+                if (!isRunning || typeof this.fps !== 'number') {
+                    return;
+                }
+                var startTime = +new Date();
+                if (lastUpdateTime) {
+                    lastUpdateGap = startTime - lastUpdateTime;
+                }
+                lastUpdateTime = startTime;
+                agency.trigger('update', +new Date());
+                var endTime = +new Date();
+                lastFrameDuration = endTime - startTime;
+                setTimeout(this.usingRAF ? function () {
+                    requestAnimationFrame(run);
+                } : run, Math.max(0, 1000 / this.fps - lastFrameDuration));
+            }.bind(this);
+            this.fps = 40;
+            this.usingRAF = true;
+            this.start = function () {
+                isRunning = true;
+                agency.trigger('start', +new Date());
+                setTimeout(run);
                 return this;
             };
-        }, this);
-    }, {
+            this.stop = function () {
+                isRunning = false;
+                agency.trigger('stop', +new Date());
+                return this;
+            };
+            Object.defineProperties(this, {
+                isRunning: { get: function () { return isRunning; } },
+                lastUpdateTime: { get: function () { return lastUpdateTime; } },
+                lastUpdateGap: { get: function () { return lastUpdateGap; } },
+                lastFrameDuration: { get: function () { return lastFrameDuration; } }
+            });
+            Loop.each(['listen', 'listenOnce', 'ignore', 'ignoreType', 'ignoreAll'], function (m) {
+                this[m] = function () {
+                    agency[m].apply(agency, arguments);
+                    return this;
+                };
+            }, this);
+        }, {
             /**
              * @description To update the frame once.
              * @returns {Ani.Frame} Self.
@@ -1297,7 +1347,8 @@ var Ani = {
                 this.fps = fps;
                 return this;
             }
-        }),
+        }
+    ),
     /**
      * @description To create a animation. (Will start it immediately.)
      * @param {number} fps The fps of the animation.
@@ -1656,7 +1707,7 @@ Element.prototype.ani = function (config) {
     }
     frame.fps = 50;
     frame.listen('update', function (now) {
-        var value = Math.med(from, from + (to - from) * fn((now - startTime) / dur), to) + unit;
+        var value = from + (to - from) * fn((now - startTime) / dur) + unit;
         if (transferer) {
             value = transferer(value);
         }
@@ -1669,6 +1720,7 @@ Element.prototype.ani = function (config) {
     frame.ele = function () {
         return ele;
     };
+    ele.style[style] = from + unit;
     return frame.start();
 };
 /**
@@ -1794,20 +1846,21 @@ var Ajax = {
      * @property {number} finishTime The finish time of the request.
      * @property {number} status The status of the request.
      */
-    Result: new Constructor(function (e, start, end) {
-        Object.defineProperties(this, {
-            e: { value: e },
-            request: { value: e.target },
-            response: {
-                get: function () {
-                    return e.target.response;
-                }
-            },
-            startTime: { value: start },
-            finishTime: { value: end },
-            status: { value: e.target.status }
-        });
-    }, {
+    Result: new Constructor(
+        function (e, start, end) {
+            Object.defineProperties(this, {
+                e: { value: e },
+                request: { value: e.target },
+                response: {
+                    get: function () {
+                        return e.target.response;
+                    }
+                },
+                startTime: { value: start },
+                finishTime: { value: end },
+                status: { value: e.target.status }
+            });
+        }, {
             /**
              * @description The method that tries to transfer the response to object.
              * @returns {Promise} The promise which tells whether the transference is successful.
@@ -1822,7 +1875,8 @@ var Ajax = {
                     }
                 });
             }
-        }),
+        }
+    ),
     /**
      * @description The config of ajax request.
      * @param {string} url The url of the request.
@@ -1837,18 +1891,19 @@ var Ajax = {
      * @property {boolean} transferData Whether to transfer the data.
      * @property {boolean} transferResult Whether to transfer the result.
      */
-    Config: new Constructor(function (url) {
-        this.method = 'GET';
-        this.url = url || null;
-        this.data = '';
-        this.async = true;
-        this.user = '';
-        this.password = '';
-        this.beforeSend = null;
-        this.transferData = true;
-        this.transferResult = true;
-        this.params = {};
-    }, {
+    Config: new Constructor(
+        function (url) {
+            this.method = 'GET';
+            this.url = url || null;
+            this.data = '';
+            this.async = true;
+            this.user = '';
+            this.password = '';
+            this.beforeSend = null;
+            this.transferData = true;
+            this.transferResult = true;
+            this.params = {};
+        }, {
             /**
              * @description To set config by an object.
              * @param {Ajax.Config} settings Settings of the config.
@@ -1862,7 +1917,8 @@ var Ajax = {
                 }, this);
                 return this;
             }
-        }),
+        }
+    ),
     /** 
      * @description This method sends an XMLHttpRequest and returns a promise.
      * @param {Ajax.Config} config Settings about the request.
