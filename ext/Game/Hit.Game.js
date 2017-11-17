@@ -160,8 +160,8 @@ Extension.export('Game-UI',
             this.height = 640;
             this.padding = 5;
             Object.defineProperties(this, {
-                left: { value: 0 },
-                top: { value: 0 },
+                left: { get: function () { return 0; } },
+                top: { get: function () { return 0; } },
                 right: { get: function () { return this.width; } },
                 bottom: { get: function () { return this.height; } },
                 cx: { get: function () { return this.width / 2; } },

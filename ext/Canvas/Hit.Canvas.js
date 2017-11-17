@@ -110,7 +110,7 @@ Loop.each({
      * @param {number} ratio The ratio.
      * @returns {undefined}
      */
-    clr: function (ratio) {
+    clearAll: function (ratio) {
         if (typeof ratio !== ' number') {
             ratio = 1;
         }
@@ -122,7 +122,7 @@ Loop.each({
      * @param {number} ratio The ratio.
      * @returns {undefined}
      */
-    fill: function (ratio) {
+    fillAll: function (ratio) {
         if (typeof ratio !== ' number') {
             ratio = 1;
         }
