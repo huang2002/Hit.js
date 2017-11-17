@@ -60,6 +60,10 @@ It is a javascript lib which not only defines some useful methods and constructo
 
 ### Some newly-defined methods:
 
+- Object
+    - concat
+- Object.prototype
+    - set
 - Element.prototype.
     - attr
     - css
@@ -114,6 +118,7 @@ In the folder `ext`, you will find various extensions, and They export(using `Ex
 - ext\range-input\Hit.range-input.js
 - ext\range-value\Hit.range-value.js
 - ext\Canvas\Hit.Canvas.js
+- ext\top\Hit.top.js
 
 ## Try it :D
 

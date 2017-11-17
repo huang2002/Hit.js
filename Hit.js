@@ -1308,14 +1308,18 @@ var Ani = {
             this.fps = 40;
             this.usingRAF = true;
             this.start = function () {
-                isRunning = true;
-                agency.trigger('start', +new Date());
-                setTimeout(run);
+                if (!isRunning) {
+                    isRunning = true;
+                    agency.trigger('start', +new Date());
+                    setTimeout(run);
+                }
                 return this;
             };
             this.stop = function () {
-                isRunning = false;
-                agency.trigger('stop', +new Date());
+                if (isRunning) {
+                    isRunning = false;
+                    agency.trigger('stop', +new Date());
+                }
                 return this;
             };
             Object.defineProperties(this, {
@@ -1456,6 +1460,7 @@ Loop.each({
 });
 
 //#region - extend elements
+
 /**
  * @description Append the element to another element;
  * @param {Element} parent Another element.
@@ -1701,6 +1706,9 @@ Element.prototype.ani = function (config) {
     }
     if (typeof fps !== 'number') {
         fps = 40;
+    }
+    if ((typeof fn === 'string') && (fn in Ani)) {
+        fn = Ani[fn];
     }
     if (!(fn instanceof Function)) {
         fn = Ani.linear;
