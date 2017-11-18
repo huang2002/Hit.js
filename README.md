@@ -62,7 +62,7 @@ It is a javascript lib which not only defines some useful methods and constructo
 
 - Object
     - concat
-- Object.prototype
+- Object.prototype.
     - set
 - Element.prototype.
     - attr
@@ -89,6 +89,8 @@ It is a javascript lib which not only defines some useful methods and constructo
     - after
     - before
     - single
+- Array.prototype.
+    - randEle
 - Math.
     - mid
     - med

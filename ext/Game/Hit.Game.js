@@ -118,12 +118,16 @@ Extension.export('Game-Controller',
              * @returns {Controller} Self.
              */
             start: function (scene) {
-                if (this.scene) {
-                    this.scene._agency.trigger('exit');
+                if (scene) {
+                    if (this.scene) {
+                        this.scene._agency.trigger('exit');
+                    }
+                    this.scene = scene;
+                    this.scene._agency.trigger('enter');
                 }
-                this.scene = scene;
-                this.scene._agency.trigger('enter');
-                this.frame.start();
+                if (!this.frame.isRunning) {
+                    this.frame.start();
+                }
                 return this;
             },
             /**
@@ -133,6 +137,14 @@ Extension.export('Game-Controller',
             stop: function () {
                 this.frame.stop();
                 return this;
+            },
+            /**
+             * @description To start rendering a scene gotten from Extension.import(name).
+             * @param {string} name The name used when exporting the scene.
+             * @returns {Controller} Self.
+             */
+            direct: function (name) {
+                return this.start(Extension.import(name));
             }
         }
     )
@@ -195,12 +207,13 @@ Extension.define('Game', [
     'Game-Controller',
     'Game-UI'
 ], function (Controller, UI) {
-    var Game = new Constructor(function () {
-        this._canvas = DOM.create('canvas.game');
-        this.context = this._canvas.getContext('2d');
-        this.controller = new Controller(this);
-        this.UI = new UI(this);
-    }, {
+    var Game = new Constructor(
+        function () {
+            this._canvas = DOM.create('canvas.game');
+            this.context = this._canvas.getContext('2d');
+            this.controller = new Controller(this);
+            this.UI = new UI(this);
+        }, {
             /**
              * @description To init the game.
              * @param {{method: Function, width: number, height: number, padding: number}} config The configuration.
@@ -228,11 +241,11 @@ Extension.define('Game', [
                     var canvas = this._canvas,
                         ratio = window.devicePixelRatio || 1;
                     canvas.css('box-shadow', '0 0 10px #000');
-                    canvas.css('border-radius', '3px');
+                    canvas.css('border-radius', '6px');
                     var justify = function () {
                         var ans = config.method(this.UI);
-                        canvas.width = this.UI.width * window.devicePixelRatio;
-                        canvas.height = this.UI.height * window.devicePixelRatio;
+                        canvas.width = this.UI.width * ratio;
+                        canvas.height = this.UI.height * ratio;
                         canvas.css('margin-left', ans.left + 'px');
                         canvas.css('margin-top', ans.top + 'px');
                         canvas.css('width', ans.width + 'px');
@@ -251,7 +264,8 @@ Extension.define('Game', [
                 }
                 return true;
             }
-        });
+        }
+    );
     // initializing methods (To tell how the canvas should be displayed.)
     Loop.each({
         // Will scale the canvas to fit the window.

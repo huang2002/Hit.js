@@ -191,7 +191,7 @@ Loop.each({
     concat: function (objArr) {
         var ans = {};
         Loop.each(objArr, function (obj) {
-            ans.set(obj);
+            Object.prototype.set.call(ans, obj);
         });
         return ans;
     }
@@ -217,6 +217,20 @@ Loop.each({
 });
 
 //#endregion
+
+// extend arrays
+Loop.each({
+    /**
+     * @description To get an element of the array randomly.
+     * @returns {any} The random element.
+     */
+    randEle: function () {
+        var len = this.length;
+        return len > 0 ? this[Math.floor(Math.random() * len)] : undefined;
+    }
+}, function (v, k) {
+    Array.prototype[k] = v;
+});
 
 // extend functions
 Loop.each({
@@ -273,7 +287,7 @@ Loop.each({
  */
 var ObjectPool = new Constructor(
     function (constructor) {
-        Object.defineProperty(this, 'constructor', { value: constructor || Object });
+        this.constructor = constructor || Object;
         this._pool = [];
     }, {
         /**
@@ -289,8 +303,8 @@ var ObjectPool = new Constructor(
          * @returns {number} How many objects are now in the pool.
          */
         recycle: function (obj) {
-            if (!(obj instanceof constructor)) {
-                throw new Error('Please input an instance of the constructor!');
+            if (!(obj instanceof this.constructor)) {
+                console.warn('Please input an instance of the constructor!');
             }
             this._pool.push(obj);
             return this._pool.length;
