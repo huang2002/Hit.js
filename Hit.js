@@ -1242,38 +1242,38 @@ var DOM = {
         // pointer
         pointerdown: function (ele, listener, useCapture) {
             ele.listen('mousedown', function (e) {
-                e.x = e.clientX;
-                e.y = e.clientY;
-                listener.call(this, e);
+                var x = e.clientX,
+                    y = e.clientY;
+                listener.call(this, e, x, y);
             }, useCapture);
             ele.listen('touchstart', function (e) {
-                e.x = e.touches[0].clientX;
-                e.y = e.touches[0].clientY;
-                listener.call(this, e);
+                var x = e.touches[0].clientX,
+                    y = e.touches[0].clientY;
+                listener.call(this, e, x, y);
             }, useCapture);
         },
         pointermove: function (ele, listener, useCapture) {
             ele.listen('mousemove', function (e) {
-                e.x = e.clientX;
-                e.y = e.clientY;
-                listener.call(this, e);
+                var x = e.clientX,
+                    y = e.clientY;
+                listener.call(this, e, x, y);
             }, useCapture);
             ele.listen('touchmove', function (e) {
-                e.x = e.touches[0].clientX;
-                e.y = e.touches[0].clientY;
-                listener.call(this, e);
+                var x = e.touches[0].clientX,
+                    y = e.touches[0].clientY;
+                listener.call(this, e, x, y);
             }, useCapture);
         },
         pointerup: function (ele, listener, useCapture) {
             ele.listen('mouseup', function (e) {
-                e.x = e.clientX;
-                e.y = e.clientY;
-                listener.call(this, e);
+                var x = e.clientX,
+                    y = e.clientY;
+                listener.call(this, e, x, y);
             }, useCapture);
             ele.listen('touchend', function (e) {
-                e.x = e.touches[0].clientX;
-                e.y = e.touches[0].clientY;
-                listener.call(this, e);
+                var x = e.touches[0].clientX,
+                    y = e.touches[0].clientY;
+                listener.call(this, e, x, y);
             }, useCapture);
         }
     }
