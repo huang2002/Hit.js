@@ -53,9 +53,10 @@ Extension.export('Game-Scene',
             /**
              * @description To render the scene.
              * @param {CanvasRenderingContext2D} ctx The context.
+             * @param {UI} UI The UI.
              */
-            draw: function (ctx) {
-                if (this.bg) {
+            draw: function (ctx, UI) {
+                if (this.bg && UI) {
                     ctx.save();
                     ctx.fillStyle = this.bg;
                     ctx.fillRect(0, 0, UI.width, UI.height);
@@ -97,7 +98,7 @@ Extension.export('Game-Controller',
                 if (scene.fps > 0) {
                     self.frame.fps = scene.fps;
                 }
-                scene.draw(ctx);
+                scene.draw(ctx, UI);
             });
             this.listenType = function (type) {
                 window.listen(type, function (e) {

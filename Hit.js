@@ -191,7 +191,7 @@ Loop.each({
     concat: function (objArr) {
         var ans = {};
         Loop.each(objArr, function (obj) {
-            Object.prototype.set.call(ans, obj);
+            ans._set(obj);
         });
         return ans;
     }
@@ -206,7 +206,7 @@ Loop.each({
      * @param {Object} obj The object describes the properties.
      * @returns {Object} Self.
      */
-    set: function (obj) {
+    _set: function (obj) {
         Loop.each(obj, function (v, k) {
             this[k] = v;
         }, this);
@@ -1376,6 +1376,17 @@ var Ani = {
         }
     ),
     /**
+     * @description To create a animation. (Will start it immediately.)
+     * @param {number} fps The fps of the animation.
+     * @param {Function} updater The updating function.
+     * @returns {Ani.Frame} The animation.
+     */
+    createFrame: function (fps, updater) {
+        var frame = new Ani.Frame();
+        frame.fps = fps;
+        return frame.listen('update', updater).start();
+    },
+    /**
      * @description To get the timing function by giving the string. (linear, ease, ease-in|easeIn, ease-out|easeOut, ease-in-out|easeInOut, steps($count, $start), cubic(x0, y0, x1, y1))
      * @param {string} str The string.
      * @returns {Function} The timing function.
@@ -1471,15 +1482,15 @@ var Ani = {
         agency.bind(this);
     },
     /**
-     * @description To create a animation. (Will start it immediately.)
-     * @param {number} fps The fps of the animation.
-     * @param {Function} updater The updating function.
-     * @returns {Ani.Frame} The animation.
+     * @description To create a transition.
+     * @param {Object} config The config. (See Ani.Transition)
+     * @param {(value: any) => void} updater The updating function.
+     * @returns {Ani.Transition} The transition.
      */
-    create: function (fps, updater) {
-        var frame = new Ani.Frame();
-        frame.fps = fps;
-        return frame.listen('start', updater).start();
+    createTransition: function (config, updater) {
+        var tran = new Ani.Transition(config);
+        trans.listen('update', updater);
+        return tran;
     },
     /**
      * @description The accuracy of cubic timing functions.
