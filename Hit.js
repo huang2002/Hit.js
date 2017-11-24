@@ -621,6 +621,14 @@ if (!('stopPropagation' in Event.prototype)) {
     };
 }
 
+// fix Math
+if (!('SQRT2' in Math)) {
+    Math.SQRT2 = Math.sqrt(2);
+}
+if (!('SQRT1_2' in Math)) {
+    Math.SQRT1_2 = Math.sqrt(.5);
+}
+
 //#endregion
 
 //#region - define ChainNode&Chain
@@ -1368,6 +1376,101 @@ var Ani = {
         }
     ),
     /**
+     * @description To get the timing function by giving the string. (linear, ease, ease-in|easeIn, ease-out|easeOut, ease-in-out|easeInOut, steps($count, $start), cubic(x0, y0, x1, y1))
+     * @param {string} str The string.
+     * @returns {Function} The timing function.
+     */
+    getFn: function (str) {
+        if (typeof str !== 'string') {
+            return null;
+        }
+        switch (str.toLowerCase()) {
+            case 'linear':
+                return Ani.linear;
+            case 'ease':
+                return Ani.ease;
+            case 'ease-in':
+            case 'easeIn':
+                return Ani.easeIn;
+            case 'ease-out':
+            case 'easeOut':
+                return Ani.easeOut;
+            case 'ease-in-out':
+            case 'easeInOut':
+                return Ani.easeInOut;
+            default:
+                if (str.match('cubic')) {
+                    str = str.replace(/\s/g, '').str.slice(str.indexOf('(') + 1, str.indexOf(')'));
+                    var arr = str.split(',').map(function (v) { return v - 0; });
+                    return Ani.cubic(arr[0], arr[1], arr[2], arr[3]);
+                } else if (str.match('steps')) {
+                    str = str.replace(/\s/g, '').str.slice(str.indexOf('(') + 1, str.indexOf(')'));
+                    var arr = str.split(',').map(function (v) { return v - 0; });
+                    return Ani.steps(arr[0], arr[1]);
+                } else {
+                    return null;
+                }
+        }
+    },
+    /**
+     * @description The constructor of transition animations.
+     * @param {{from: number, to: number, dur: number, fps: number, fn: (at: number) => number, transferer: (value: any) => any}} config The config.
+     * @property {Ani.Frame} frame The frame.
+     * @property {Agency} agency The agency.
+     */
+    Transition: function (config) {
+        var ele = this,
+            agency = new Agency(),
+            frame = new Ani.Frame(),
+            from = config.from,
+            to = config.to,
+            dur = config.dur,
+            fps = config.fps,
+            fn = config.fn,
+            transferer = config.transferer || false,
+            startTime = +new Date();
+        if (from == undefined) {
+            from = 0;
+        }
+        if (typeof from === 'string') {
+            from -= 0;
+        }
+        if (typeof to === 'string') {
+            to -= 0;
+        }
+        if (typeof dur !== 'number') {
+            dur = 1000;
+        }
+        if (typeof fps !== 'number') {
+            fps = 40;
+        }
+        if (!(fn instanceof Function)) {
+            fn = Ani.getFn(fn) || Ani.linear;
+        }
+        frame.fps = 50;
+        frame.listen('update', function (now) {
+            var value = from + (to - from) * fn((now - startTime) / dur);
+            if (transferer) {
+                value = transferer(value);
+            }
+            agency.trigger('update', [value]);
+        });
+        frame.listen('stop', function () {
+            agency.trigger('stop');
+            agency.trigger('update', [to]);
+        });
+        setTimeout(function () {
+            agency.trigger('update', [from]);
+        });
+        setTimeout(frame.stop, dur);
+        frame.start();
+        this.frame = frame;
+        this.agency = agency;
+        this.start = frame.start.bind(frame);
+        this.stop = frame.stop.bind(frame);
+        agency.bind(this);
+    },
+    /**
      * @description To create a animation. (Will start it immediately.)
      * @param {number} fps The fps of the animation.
      * @param {Function} updater The updating function.
@@ -1453,6 +1556,12 @@ var Ani = {
     linear: function (at) {
         return at;
     },
+    /**
+     * @description To get a timing function of steps($count, $start).
+     * @param {number} count How many steps.
+     * @param {boolean} start Whether to jump at start.
+     * @returns {Function} The timing function.
+     */
     steps: function (count, start) {
         start = start || false;
         var gap = 1 / count;
@@ -1689,61 +1798,16 @@ Element.prototype.val = function (val) {
 };
 /**
  * @description To create an animation of the element. (Will start the animation immediately.)
- * @param {{style: string, from: number, to: number, dur: number, fps: number, unit: string, fn: (at: number) => number, transferer: (value: any) => any}} config The config.
- * @returns {Ani.Frame} The animation.
+ * @param {{style: string, unit: string}} config The config. (For more properties, see Ani.Transition)
+ * @returns {Ani.Transition} The animation.
  */
 Element.prototype.ani = function (config) {
     var ele = this,
-        frame = new Ani.Frame(),
-        from = config.from,
-        to = config.to,
-        dur = config.dur,
-        unit = 'unit' in config ? config.unit : 'px',
-        fps = config.fps,
-        style = config.style,
-        numReg = /^-?\d*\.?\d+/g,
-        fn = config.fn,
-        transferer = config.transferer || false,
-        startTime = +new Date();
-    if (from == undefined) {
-        from = this.style[style] || 0;
-    }
-    if (typeof from === 'string') {
-        from = from.match(numReg)[0] - 0;
-    }
-    if (typeof to === 'string') {
-        to = to.match(numReg)[0];
-        to -= 0;
-    }
-    if (typeof dur !== 'number') {
-        dur = 1000;
-    }
-    if (typeof fps !== 'number') {
-        fps = 40;
-    }
-    if ((typeof fn === 'string') && (fn in Ani)) {
-        fn = Ani[fn];
-    }
-    if (!(fn instanceof Function)) {
-        fn = Ani.linear;
-    }
-    frame.fps = 50;
-    frame.listen('update', function (now) {
-        var value = from + (to - from) * fn((now - startTime) / dur) + unit;
-        if (transferer) {
-            value = transferer(value);
-        }
-        ele.style[style] = value;
+        tran = new Ani.Transition(config);
+    tran.agency.listen('update', function (val) {
+        ele.style[config.style] = val + config.unit || 'px';
     });
-    frame.listen('stop', function () {
-        ele.style[style] = to + unit;
-    });
-    setTimeout(frame.stop, dur);
-    frame.ele = function () {
-        return ele;
-    };
-    ele.style[style] = from + unit;
-    return frame.start();
+    return tran;
 };
 /**
  * @description To let the element fade out.

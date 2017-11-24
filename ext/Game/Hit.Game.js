@@ -49,6 +49,24 @@ Extension.export('Game-Scene',
                     return i !== item;
                 });
                 return this;
+            },
+            /**
+             * @description To render the scene.
+             * @param {CanvasRenderingContext2D} ctx The context.
+             */
+            draw: function (ctx) {
+                if (this.bg) {
+                    ctx.save();
+                    ctx.fillStyle = this.bg;
+                    ctx.fillRect(0, 0, UI.width, UI.height);
+                    ctx.restore();
+                }
+                this._agency.trigger('update');
+                Loop.each(this.items, function (item) {
+                    if ('draw' in item) {
+                        item.draw(ctx);
+                    }
+                });
             }
         }
     )
@@ -79,18 +97,7 @@ Extension.export('Game-Controller',
                 if (scene.fps > 0) {
                     self.frame.fps = scene.fps;
                 }
-                if (scene.bg) {
-                    ctx.save();
-                    ctx.fillStyle = scene.bg;
-                    ctx.fillRect(0, 0, UI.width, UI.height);
-                    ctx.restore();
-                }
-                scene._agency.trigger('update');
-                Loop.each(scene.items, function (item) {
-                    if ('draw' in item) {
-                        item.draw(ctx);
-                    }
-                });
+                scene.draw(ctx);
             });
             this.listenType = function (type) {
                 window.listen(type, function (e) {
