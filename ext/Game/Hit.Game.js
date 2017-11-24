@@ -242,14 +242,8 @@ Extension.define('Game', [
                     if (!('method' in config)) {
                         config.method = Game.FIXED;
                     }
-                    document.body.css('margin', '0');
-                    document.body.css('padding', '0');
-                    document.body.css('background-color', '#333');
-                    document.body.css('overflow', 'hidden');
                     var canvas = this._canvas,
                         ratio = window.devicePixelRatio || 1;
-                    canvas.css('box-shadow', '0 0 10px #000');
-                    canvas.css('border-radius', '6px');
                     var justify = function () {
                         var ans = config.method(this.UI);
                         canvas.width = this.UI.width * ratio;
