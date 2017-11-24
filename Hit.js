@@ -1255,8 +1255,9 @@ var DOM = {
                 listener.call(this, e, x, y);
             }, useCapture);
             ele.listen('touchstart', function (e) {
-                var x = e.touches[0].clientX,
-                    y = e.touches[0].clientY;
+                var touches = e.changedTouches || e.touches,
+                    x = touches[0] ? touches[0].clientX : null,
+                    y = touches[0] ? touches[0].clientY : null;
                 listener.call(this, e, x, y);
             }, useCapture);
         },
@@ -1267,8 +1268,9 @@ var DOM = {
                 listener.call(this, e, x, y);
             }, useCapture);
             ele.listen('touchmove', function (e) {
-                var x = e.touches[0].clientX,
-                    y = e.touches[0].clientY;
+                var touches = e.changedTouches || e.touches,
+                    x = touches[0] ? touches[0].clientX : null,
+                    y = touches[0] ? touches[0].clientY : null;
                 listener.call(this, e, x, y);
             }, useCapture);
         },
@@ -1279,8 +1281,9 @@ var DOM = {
                 listener.call(this, e, x, y);
             }, useCapture);
             ele.listen('touchend', function (e) {
-                var x = e.touches[0].clientX,
-                    y = e.touches[0].clientY;
+                var touches = e.changedTouches || e.touches,
+                    x = touches[0] ? touches[0].clientX : null,
+                    y = touches[0] ? touches[0].clientY : null;
                 listener.call(this, e, x, y);
             }, useCapture);
         }
