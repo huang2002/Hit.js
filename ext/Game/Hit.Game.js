@@ -62,7 +62,6 @@ Extension.export('Game-Scene',
                     ctx.fillRect(0, 0, UI.width, UI.height);
                     ctx.restore();
                 }
-                this._agency.trigger('update');
                 Loop.each(this.items, function (item) {
                     if ('draw' in item) {
                         item.draw(ctx);
@@ -98,6 +97,7 @@ Extension.export('Game-Controller',
                 if (scene.fps > 0) {
                     self.frame.fps = scene.fps;
                 }
+                scene._agency.trigger('update');
                 scene.draw(ctx, UI);
             });
             this.listenType = function (type) {
