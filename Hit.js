@@ -521,30 +521,38 @@ if (!('Promise' in window)) {
                 }
             }
             if (onfulfilled) {
-                return (new Promise)(function (resolve, reject) {
-                    onfulfilledCallbacks.push(function (data) {
-                        if (onfulfilled instanceof Function) {
-                            try {
-                                var val = onfulfilled(data);
-                                if (val && val.then) {
-                                    val.then(resolve, reject);
-                                } else {
-                                    resolve(val);
+                if (status === 'resolved') {
+                    try {
+                        return new Promise.resolve(onfulfilled(value));
+                    } catch (err) {
+                        return new Promise.reject(err);
+                    }
+                } else {
+                    return new Promise(function (resolve, reject) {
+                        onfulfilledCallbacks.push(function (data) {
+                            if (onfulfilled instanceof Function) {
+                                try {
+                                    var val = onfulfilled(data);
+                                    if (val && val.then) {
+                                        val.then(resolve, reject);
+                                    } else {
+                                        resolve(val);
+                                    }
+                                } catch (err) {
+                                    reject(err);
                                 }
-                            } catch (err) {
-                                reject(err);
+                            } else {
+                                return resolve(onfulfilled);
                             }
-                        } else {
-                            return resolve(onfulfilled);
-                        }
+                        });
                     });
-                });
+                }
             } else {
                 return this;
             }
         };
         this.catch = function (onerror) {
-            onerrorCallbacks.push(error);
+            onerrorCallbacks.push(onerror);
             return this;
         };
         if (executor) {
@@ -589,6 +597,46 @@ if (!('resolve' in Promise)) {
         });
     };
 
+}
+if (!('all' in Promise)) {
+    Promise.all = function (promises) {
+        return new Promise(function (resolve, reject) {
+            var rest = promises.length,
+                dataArr = new Array(rest),
+                hasPromise = false;
+            Loop.each(promises, function (p, i) {
+                if (p instanceof Object && 'then' in p) {
+                    hasPromise = true;
+                    p.then(function (data) {
+                        rest--;
+                        dataArr[i] = data;
+                        if (rest <= 0) {
+                            resolve(dataArr);
+                        }
+                    }, reject);
+                }
+            });
+            if (!hasPromise) {
+                resolve(dataArr);
+            }
+        });
+    };
+}
+if (!('race' in Promise)) {
+    Promise.race = function (promises) {
+        return new Promise(function (resolve, reject) {
+            var hasPromise = false;
+            Loop.each(promises, function (p, i) {
+                if (p instanceof Object && 'then' in p) {
+                    hasPromise = true;
+                    p.then(resolve, reject);
+                }
+            });
+            if (!hasPromise) {
+                resolve();
+            }
+        });
+    };
 }
 
 // fix setImmediate
@@ -2144,11 +2192,11 @@ var Script = {
         }
         return new Promise(function (resolve, reject) {
             try {
-                type = type || 'text/javascript';
                 if (useIncludePath !== false) {
                     url = Script.includePath + url;
                 }
                 var scriptTag = document.createElement('script');
+                scriptTag.type = type || 'text/javascript';
                 scriptTag.src = url;
                 scriptTag.onload = resolve;
                 scriptTag.onabort = reject;

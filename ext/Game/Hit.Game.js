@@ -180,12 +180,36 @@ Extension.export('Game-UI',
             this.height = 640;
             this.padding = 5;
             Object.defineProperties(this, {
-                left: { get: function () { return 0; } },
-                top: { get: function () { return 0; } },
-                right: { get: function () { return this.width; } },
-                bottom: { get: function () { return this.height; } },
-                cx: { get: function () { return this.width / 2; } },
-                cy: { get: function () { return this.height / 2; } }
+                left: {
+                    get: function () {
+                        return 0;
+                    }
+                },
+                top: {
+                    get: function () {
+                        return 0;
+                    }
+                },
+                right: {
+                    get: function () {
+                        return this.width;
+                    }
+                },
+                bottom: {
+                    get: function () {
+                        return this.height;
+                    }
+                },
+                cx: {
+                    get: function () {
+                        return this.width / 2;
+                    }
+                },
+                cy: {
+                    get: function () {
+                        return this.height / 2;
+                    }
+                }
             });
             var canvas = game._canvas;
             this.toGameX = function (x) {
@@ -252,13 +276,13 @@ Extension.define('Game', [
                         canvas.css('margin-top', ans.top + 'px');
                         canvas.css('width', ans.width + 'px');
                         canvas.css('height', ans.height + 'px');
+                        this.context.scale(ratio, ratio);
                     }.bind(this);
                     justify();
                     if (config.autoResize !== false) {
                         window.listen('resize', justify);
                         window.listen('orientationchange', justify);
                     }
-                    this.context.scale(ratio, ratio);
                     document.body.appendChild(canvas)
                 } catch (err) {
                     console.error(err);
