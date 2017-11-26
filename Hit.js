@@ -2201,7 +2201,7 @@ var Script = {
                 scriptTag.onload = resolve;
                 scriptTag.onabort = reject;
                 scriptTag.onerror = reject;
-                document.head.appendChild(scriptTag);
+                (document.body || document.head).appendChild(scriptTag);
             } catch (err) {
                 reject(err);
             }
@@ -2216,14 +2216,21 @@ var Script = {
      * @returns {Promise} The promise tells whether all the script files have loaded successfully.
      */
     loadSome: function (urls, sequentially, type, useIncludePath) {
-        if (sequentially === true) {
-            var promise = Promise.resolve();
-            Loop.each(urls, function (url) {
-                promise = promise.then(function () {
-                    return Script.loadOne(url, type, useIncludePath);
-                });
+        if (sequentially !== false) {
+            return new Promise(function (resolve, reject) {
+                var ans = [];
+                var next = function () {
+                    if (urls.length <= 0) {
+                        resolve(ans);
+                    }
+                    var url = urls.shift();
+                    Script.loadOne(url, type, useIncludePath).then(function (data) {
+                        ans.push(data);
+                        return next();
+                    }, reject);
+                };
+                next();
             });
-            return promise;
         } else {
             return Promise.all(Loop.map(urls, function (url) {
                 return Script.loadOne(url, type, useIncludePath);
@@ -2237,14 +2244,21 @@ var Script = {
      * @param {boolean} useIncludePath Whether to use the include path.
      * @returns {Promise} The promise tells whether all the script file groups have loaded successfully.
      */
-    loadGroup: function (urls, type, useIncludePath) {
-        var promise = Promise.resolve();
-        Loop.each(urls, function (url) {
-            promise = promise.then(function () {
-                return Script.loadSome(url, false, type, useIncludePath);
-            });
+    loadGroup: function (urlArr, type, useIncludePath) {
+        return new Promise(function (resolve, reject) {
+            var ans = [];
+            var next = function () {
+                if (urlArr.length <= 0) {
+                    resolve(ans);
+                }
+                var urls = urlArr.shift();
+                Script.loadSome(urls, false, type, useIncludePath).then(function (data) {
+                    ans.push(data);
+                    return next();
+                }, reject);
+            };
+            next();
         });
-        return promise;
     }
 };
 
