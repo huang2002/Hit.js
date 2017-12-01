@@ -404,8 +404,15 @@ if (!('of' in Array)) {
     };
 }
 if (!('includes' in Array.prototype)) {
-    Array.prototype.includes = function (ele) {
-        return Loop.find(this, function (e) { return Compare.equal(e, ele); });
+    Array.prototype.includes = function (ele, start) {
+        return Loop.find(this.slice(start || 0), function (e) { return Compare.equal(e, ele); });
+    };
+}
+
+// fix strings
+if (!('includes' in String.prototype)) {
+    String.prototype.includes = function (search, start) {
+        return this.slice(start || 0).indexOf(search) !== -1;
     };
 }
 
@@ -1519,10 +1526,10 @@ var Ani = {
         });
         frame.listen('stop', function () {
             agency.trigger('stop');
-            agency.trigger('update', [to]);
+            agency.trigger('update', from + (to - from) * fn(1));
         });
         setTimeout(function () {
-            agency.trigger('update', [from]);
+            agency.trigger('update', from + (to - from) * fn(0));
         });
         setTimeout(frame.stop, dur);
         frame.start();
@@ -1547,7 +1554,7 @@ var Ani = {
      * @description The accuracy of cubic timing functions.
      * @type {number} The accuracy.
      */
-    cubicAccuracy: .006,
+    cubicAccuracy: .01,
     /**
      * @description To create a timing function of cubic(x0, y0, x1, y2).
      * @param {number} x0 x0.
@@ -1601,7 +1608,6 @@ var Ani = {
                         return find(x, mid, right);
                     }
                 } catch (err) {
-                    console.warn('Failed to calculate more accurately:' + err);
                     return ans.y;
                 }
             }

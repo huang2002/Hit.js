@@ -10,7 +10,7 @@ DOM.load(function () {
             return;
         }
         var outer = DOM.create('div.range'),
-            inner = DOM.create('dib.range-inner').appendTo(outer),
+            inner = DOM.create('div.range-inner').appendTo(outer),
             thumb = DOM.create('div.range-thumb').appendTo(inner);
         var isActive = false;
         var startInput = function (e) {

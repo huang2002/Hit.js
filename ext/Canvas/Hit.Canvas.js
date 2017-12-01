@@ -95,7 +95,7 @@ Loop.each({
         }
         var data = this.getImageData(x, y, w, h).data,
             ans = [];
-        for (var i = 0; i < data.length / 4; i += 4) {
+        for (var i = 0; i < data.length; i += 4) {
             ans.push({
                 r: data[i],
                 g: data[i + 1],
@@ -128,6 +128,37 @@ Loop.each({
         }
         var c = this.canvas;
         this.fillRect(0, 0, c.width * ratio, c.height * ratio);
+    },
+    /**
+     * @description To map the pixels of area(x, y, w, h).
+     * @param {number} x The x.
+     * @param {number} y The y.
+     * @param {number} w The w.
+     * @param {number} h The h.
+     * @typedef {r: number, g: number, b: number, a: number} Pixel
+     * @param {(pixel: Pixel, x:number, y: number) => void} callback The callback function receives the pixel.
+     */
+    mapPixels: function (x, y, w, h, callback) {
+        if (arguments.length === 1) {
+            var canvas = this.canvas;
+            return this.mapPixels(0, 0, canvas.width, canvas.height, arguments[0]);
+        }
+        var imgData = this.getImageData(x, y, w, h),
+            data = imgData.data;
+        for (var i = 0; i < data.length; i += 4) {
+            var px = {
+                r: data[i],
+                g: data[i + 1],
+                b: data[i + 2],
+                a: data[i + 3]
+            };
+            callback(px, i % w, Math.floor(i / w));
+            data[i] = Math.round(px.r) || 0;
+            data[i + 1] = Math.round(px.g) || 0;
+            data[i + 2] = Math.round(px.b) || 0;
+            data[i + 3] = Math.round(px.a) || 0;
+        }
+        this.putImageData(imgData, x, y);
     }
 }, function (v, k) {
     CanvasRenderingContext2D.prototype[k] = v;

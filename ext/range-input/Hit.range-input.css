@@ -34,7 +34,6 @@
     background: #bef;
     border-radius: 99em;
     box-shadow: inset 1px 1px 1px rgba(0, 0, 0, .5);
-    transform: translateY(-1px);
 }
 
 .range-thumb {
