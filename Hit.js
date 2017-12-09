@@ -10,10 +10,32 @@
  * @description To create a constructor.
  * @param {Function} fn The function constructs the object.
  * @param {{[key: string]: string}} prototype The prototype.
+ * @param {Array<Constructor>} inherit The inheritances.
  * @returns {Function} The constructor.
  */
-var Constructor = function (fn, prototype) {
-    fn.prototype = prototype || {};
+var Constructor = function (fn, prototype, inherit) {
+    if (prototype) {
+        if (inherit) {
+            fn.prototype = Object.concat([Object.concat(Loop.map(inherit, function (inh) { return inh.prototype; })), fn.prototype, prototype]);
+        } else {
+            fn.prototype = Object.concat([fn.prototype, prototype]);
+        }
+    } else if (inherit) {
+        fn.prototype = Object.concat([Object.concat(Loop.map(inherit, function (inh) { return inh.prototype; })), fn.prototype]);
+    }
+    if (inherit) {
+        fn = (function (f) {
+            var fun = function () {
+                var args = arguments;
+                Loop.each(inherit, function (inh) {
+                    inh.apply(this, args);
+                }, this);
+                f.apply(this, args);
+            };
+            fun.prototype = f.prototype;
+            return fun;
+        })(fn);
+    }
     return fn;
 };
 
