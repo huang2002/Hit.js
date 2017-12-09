@@ -69,7 +69,7 @@ It is a javascript lib which not only defines some useful methods and constructo
 - Object
     - concat
 - Object.prototype.
-    - set
+    - _set
 - Element.prototype.
     - attr
     - css

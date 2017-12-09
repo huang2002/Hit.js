@@ -896,6 +896,7 @@ var Chain = new Constructor(
         abandon: function () {
             if (this.tail) {
                 this.tail.prev.next = null;
+                this.tail.prev = null;
                 this.tail = this.tail.prev;
             }
             return this;
