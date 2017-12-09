@@ -169,13 +169,21 @@ var Loop = {
 /** @description This object has some methods about comparison. */
 var Compare = {
     /**
+     * @description To tell whether the arg is NaN.
+     * @param {any} arg The arg.
+     * @returns {boolean} The result.
+     */
+    isNaN: function (arg) {
+        return typeof arg === 'number' && isNaN(arg);
+    },
+    /**
      * @description Tell whether a equals b. (NaN will equal NaN)
      * @param {any} a One variable to compare.
      * @param {any} b Another variable to compare.
      * @returns {boolean} Whether a equals b.
      */
     equal: function (a, b) {
-        return (a === b) || (isNaN(a) && isNaN(b));
+        return (a === b) || (Compare.isNaN(a) && Compare.isNaN(b));
     }
 };
 
@@ -227,6 +235,19 @@ Loop.each({
     randEle: function () {
         var len = this.length;
         return len > 0 ? this[Math.floor(Math.random() * len)] : undefined;
+    },
+    /**
+     * @description To replace the array with a new array and return the old one.
+     * @param {Array<any>} arr The new array.
+     * @returns {Array<any>} The old array.
+     */
+    replaceWith: function (arr) {
+        var copy = Array.from(this);
+        this.length = 0;
+        for (var i = 0; i < arr.length; i++) {
+            this.push(arr[i]);
+        }
+        return copy;
     }
 }, function (v, k) {
     Array.prototype[k] = v;
@@ -405,7 +426,7 @@ if (!('of' in Array)) {
 }
 if (!('includes' in Array.prototype)) {
     Array.prototype.includes = function (ele, start) {
-        return Loop.find(this.slice(start || 0), function (e) { return Compare.equal(e, ele); });
+        return Loop.some(this.slice(start || 0), function (e) { return Compare.equal(e, ele); });
     };
 }
 
@@ -1518,20 +1539,23 @@ var Ani = {
         }
         frame.fps = 50;
         frame.listen('update', function (now) {
-            var value = from + (to - from) * fn((now - startTime) / dur);
+            var at = (now - startTime) / dur,
+                value = from + (to - from) * fn(at);
             if (transferer) {
                 value = transferer(value);
             }
             agency.trigger('update', [value]);
+            if (at >= 1) {
+                frame.stop();
+                agency.trigger('update', from + (to - from) * fn(1));
+            }
         });
         frame.listen('stop', function () {
             agency.trigger('stop');
-            agency.trigger('update', from + (to - from) * fn(1));
         });
         setTimeout(function () {
             agency.trigger('update', from + (to - from) * fn(0));
         });
-        setTimeout(frame.stop, dur);
         frame.start();
         this.frame = frame;
         this.agency = agency;
@@ -1547,7 +1571,7 @@ var Ani = {
      */
     createTransition: function (config, updater) {
         var tran = new Ani.Transition(config);
-        trans.listen('update', updater);
+        tran.listen('update', updater);
         return tran;
     },
     /**

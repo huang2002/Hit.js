@@ -26,6 +26,7 @@ It is a javascript lib which not only defines some useful methods and constructo
     - some
     - every
 - Compare
+    - isNaN
     - equal
 - DOM
     - select
@@ -96,6 +97,7 @@ It is a javascript lib which not only defines some useful methods and constructo
     - single
 - Array.prototype.
     - randEle
+    - replaceWith
 - Math.
     - mid
     - med
