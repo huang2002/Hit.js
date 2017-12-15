@@ -11,7 +11,6 @@ It is a javascript lib which not only defines some useful methods and constructo
 - Constructor
 - Sequence
 - ObjectPool
-- Chain
 - Agency
 - Ani.Frame
 
@@ -107,6 +106,8 @@ It is a javascript lib which not only defines some useful methods and constructo
     - distance_p
     - distance3d
     - distance3d_p
+    - rand
+    - randInt
 
 ## Extensions
 

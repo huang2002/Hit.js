@@ -226,7 +226,10 @@ Loop.each({
         return ans;
     }
 }, function (v, k) {
-    Object[k] = v;
+    Object.defineProperty(Object, k, {
+        value: v,
+        enumerable: false
+    });
 });
 
 // objects
@@ -243,7 +246,10 @@ Loop.each({
         return this;
     }
 }, function (v, k) {
-    Object.prototype[k] = v;
+    Object.defineProperty(Object.prototype, k, {
+        value: v,
+        enumerable: false
+    });
 });
 
 //#endregion
@@ -270,9 +276,35 @@ Loop.each({
             this.push(arr[i]);
         }
         return copy;
+    },
+    /**
+     * @description To split an array.
+     * @param {number} len The length of each piece.
+     * @param {boolean} cut Whether to cut the extra element.
+     * @returns {Array} The result.
+     */
+    split: function (len, cut) {
+        if (typeof len !== 'number' || len <= 0 || len % 1 !== 0 || len >= this.length) {
+            return [Array.from(this)];
+        }
+        var ans = [],
+            l = Math[cut !== false ? 'floor' : 'ceil'](this.length / len) * len;
+        for (var i = 0; i < l; i += len) {
+            ans.push([]);
+            for (var j = 0; j < len; j++) {
+                if (i + j >= this.length) {
+                    break;
+                }
+                ans.last.push(this[i + j]);
+            }
+        }
+        return ans;
     }
 }, function (v, k) {
-    Array.prototype[k] = v;
+    Object.defineProperty(Array.prototype, k, {
+        value: v,
+        enumerable: false
+    });
 });
 
 // extend functions
@@ -320,8 +352,11 @@ Loop.each({
             return instance;
         };
     }
-}, function (ext, key) {
-    Function.prototype[key] = ext;
+}, function (v, k) {
+    Object.defineProperty(Function.prototype, k, {
+        value: v,
+        enumerable: false
+    });
 });
 
 /**
@@ -729,210 +764,6 @@ if (!('SQRT1_2' in Math)) {
 
 //#endregion
 
-//#region - define ChainNode&Chain
-
-/**
- * @description The constructor of the nodes of chains.
- * @param {any} value The value of the node.
- * @property {ChainNode} prev Previous node.
- * @property {ChainNode} next Next node.
- * @property {any} value The value of the node.
- */
-var ChainNode = new Constructor(
-    function (value) {
-        this.next = null;
-        this.prev = null;
-        this.value = value;
-    }, {
-        /**
-         * @description To insert a node after the node.
-         * @param {ChainNode} node The node to insert.
-         * @returns {ChainNode} Next node if it isn't null, self otherwise.
-         */
-        insertAfter: function (node) {
-            if (node == null) {
-                if (this.next) {
-                    this.next.prev = null;
-                    this.next = null;
-                }
-                return this;
-            }
-            if (!ChainNode.check(node)) {
-                console.warn('Illegal node');
-                return undefined;
-            }
-            this.next = node;
-            if (node.prev) {
-                node.prev.next = null;
-            }
-            node.prev = this;
-            return node;
-        },
-        /**
-         * @description To insert a node before the node.
-         * @param {ChainNode} node The node to insert.
-         * @returns {ChainNode} Pervious node if it isn't null, self otherwise.
-         */
-        insertBefore: function (node) {
-            if (node == null) {
-                if (this.prev) {
-                    this.prev.next = null;
-                    this.prev = null;
-                }
-                return this;
-            }
-            if (!ChainNode.check(node)) {
-                console.warn('Illegal node');
-                return undefined;
-            }
-            this.prev = node;
-            if (node.next) {
-                node.next.prev = null;
-            }
-            node.next = this;
-            return node;
-        },
-        /**
-         * @description To remove the node.
-         * @returns {undefined} No return value.
-         */
-        remove: function () {
-            if (this.prev) {
-                this.prev.next = null;
-                this.prev = null;
-            }
-            if (this.next) {
-                this.next.prev = null;
-                this.next = null;
-            }
-        }
-    }
-);
-/**
- * @description To check if the object is a node or a node like.
- * @returns {boolean} The result.
- */
-ChainNode.check = function (obj) {
-    return node instanceof Object && 'next' in node && 'prev' in node;
-};
-/**
- * @description The constructor of chains.
- * @property {ChainNode} head The first node.
- * @property {ChainNode} tail The last node.
- * @property {ChainNode} pointer The pointer.
- */
-var Chain = new Constructor(
-    function (initialVal) {
-        this.head = null;
-        this.tail = null;
-        this.pointer = null;
-        if (initialVal) {
-            Loop.each(initialVal, function (val) {
-                this.append(new ChainNode(val));
-            }, this);
-        }
-    }, {
-        /**
-         * @description To count the nodes of the chain.
-         * @returns {number} The length of the chain.
-         */
-        count: function () {
-            if (!this.head) {
-                return 0;
-            }
-            var ans = 1,
-                maxLen = Chain.maxLen,
-                node = this.head;
-            while (node !== this.tail) {
-                ans++;
-                node = node.next;
-                if (ans > maxLen) {
-                    console.warn('This chain may be too long to count.');
-                    return maxLen;
-                }
-            }
-            return ans;
-        },
-        /**
-         * @description To append a node.
-         * @param {ChainNode} node The node to append.
-         * @returns {Chain} Self.
-         */
-        append: function (node) {
-            if (!ChainNode.check(node)) {
-                console.warn('Illegal node');
-                return undefined;
-            }
-            if (this.tail) {
-                node.prev = this.tail;
-                this.tail.next = node;
-                this.tail = node;
-            } else {
-                this.pointer = this.tail = this.head = node;
-            }
-            return this;
-        },
-        /**
-         * @description To convert the chain to array.
-         * @param {boolean} copy Whether to copy the nodes. (default value is true)
-         * @returns {Array<ChainNode>} The result.
-         */
-        toArray: function (copy) {
-            if (!this.head) {
-                return [];
-            }
-            var maxLen = Chain.maxLen,
-                node = this.head,
-                ans = [node];
-            while (node !== this.tail) {
-                node = node.next;
-                ans.push(copy !== false ? new ChainNode(node) : node);
-                if (ans.length > maxLen) {
-                    console.warn('This chain may be too long to convert.');
-                    return ans;
-                }
-            }
-            return ans;
-        },
-        /**
-         * @description To move the pointer to the first node.
-         * @returns {ChainNode} The first node.
-         */
-        reset: function () {
-            return this.pointer = this.head;
-        },
-        /**
-         * @description To move the pointer to next node.
-         * @returns {ChainNode} Next node.
-         */
-        next: function () {
-            if (this.pointer) {
-                this.pointer = this.pointer.next;
-            }
-            return this.pointer;
-        },
-        /**
-         * @description To abandon the last node.
-         * @returns {Chain} Self.
-         */
-        abandon: function () {
-            if (this.tail) {
-                this.tail.prev.next = null;
-                this.tail.prev = null;
-                this.tail = this.tail.prev;
-            }
-            return this;
-        }
-    }
-);
-/**
- * @description The max length of a chain.
- * @type {number}
- */
-Chain.maxLen = 99999;
-
-//#endregion
-
 /**
  * @description The constructor of agencies.
  * @property {boolean} cache Whether to store the trigger action without being executed at once.
@@ -1186,9 +1017,27 @@ Loop.each({
      */
     distance3d_p: function (p0, p1) {
         return Math.distance3d(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
+    },
+    /**
+     * @description To get a random value between min and max.
+     * @param {number} min
+     * @param {number} max
+     * @returns {number} The result.
+     */
+    rand: function (min, max) {
+        return min + Math.random() * (max - min);
+    },
+    /**
+     * @description To get a random integer between min and max.
+     * @param {number} min
+     * @param {number} max
+     * @returns {number} The result.
+     */
+    randInt: function (min, max) {
+        return Math.round(min + Math.random() * (max - min));
     }
-}, function (ext, key) {
-    Math[key] = ext;
+}, function (v, k) {
+    Math[k] = v;
 });
 
 // extend Array
@@ -1201,31 +1050,6 @@ Object.defineProperties(Array.prototype, {
      * @description Point to the last element of the array.
      */
     last: { get: function () { return this.length > 0 ? this[this.length - 1] : undefined; } }
-});
-Loop.each({
-    /**
-     * @description To split an array.
-     * @param {number}
-     */
-    split: function (len, cut) {
-        if (typeof len !== 'number' || len <= 0 || len % 1 !== 0 || len >= this.length) {
-            return [Array.from(this)];
-        }
-        var ans = [],
-            l = Math[cut !== false ? 'floor' : 'ceil'](this.length / len) * len;
-        for (var i = 0; i < l; i += len) {
-            ans.push([]);
-            for (var j = 0; j < len; j++) {
-                if (i + j >= this.length) {
-                    break;
-                }
-                ans.last.push(this[i + j]);
-            }
-        }
-        return ans;
-    }
-}, function (v, k) {
-    Array.prototype[k] = v;
 });
 
 /** @description This object has some methods or constructors about DOM. */
@@ -1963,6 +1787,9 @@ Element.prototype.fadeIn = function (config) {
         fn: config.fn
     });
 };
+
+//#endregion
+
 // extend elements, documents and windows.
 Loop.each([
     Element,
@@ -2030,8 +1857,6 @@ Loop.each([
         O.prototype[key] = ext;
     });
 });
-
-//#endregion
 
 /**  @description This object has some methods or constructors about ajax. */
 var Ajax = {
