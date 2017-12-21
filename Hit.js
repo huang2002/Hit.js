@@ -1395,10 +1395,8 @@ var Ani = {
             if (at >= 1) {
                 frame.stop();
                 agency.trigger('update', from + (to - from) * fn(1));
+                agency.trigger('stop');
             }
-        });
-        frame.listen('stop', function () {
-            agency.trigger('stop');
         });
         setTimeout(function () {
             agency.trigger('update', from + (to - from) * fn(0));
@@ -1765,6 +1763,7 @@ Element.prototype.fadeOut = function (config) {
         dur: config.dur || 1000,
         fn: config.fn
     }).listen('stop', function () {
+        ele.css('opacity', 0);
         ele.hide();
     });
 };
@@ -1785,6 +1784,8 @@ Element.prototype.fadeIn = function (config) {
         fps: config.fps || 32,
         dur: config.dur || 1000,
         fn: config.fn
+    }).listen('stop', function () {
+        ele.css('opacity', 1);
     });
 };
 
