@@ -196,12 +196,21 @@ Extension.define('Beeper', [], function () {
                 if (this.isRunning) {
                     return this;
                 }
-                var beeper = this.beeper;
+                this.isRunning = true;
+                var beeper = this.beeper,
+                    gap = this.gap;
                 beeper.setGain(0);
-                var s = 0;
+                var s = -gap;
                 Loop.each(this.beepArr, function (v, i) {
                     if (i & 1) {
+                        if (gap) {
+                            s += gap;
+                            beeper.gainNode.gain.setValueAtTime(1, ctx.currentTime + s / 1000);
+                        }
                         s += v;
+                        if (gap) {
+                            beeper.gainNode.gain.setValueAtTime(0, ctx.currentTime + s / 1000);
+                        }
                     } else {
                         beeper.oscillatorNode.frequency.setValueAtTime(v, ctx.currentTime + s / 1000);
                     }
