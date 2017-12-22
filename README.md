@@ -125,6 +125,8 @@ In the folder `ext`, you will find various extensions, and They export(using `Ex
     - LocalStore
 - ext\msgBox\Hit.msgBox.js
     - msgBox
+- ext\Beeper\Hit.Beeper.js
+    - Beeper
 - ext\range-input\Hit.range-input.js
 - ext\range-value\Hit.range-value.js
 - ext\Canvas\Hit.Canvas.js
