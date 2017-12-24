@@ -65,7 +65,7 @@ It is a javascript lib which not only defines some useful methods and constructo
 
 ### Some newly-defined methods:
 
-- Object
+- Object.
     - concat
 - Object.prototype.
     - _set
@@ -119,8 +119,7 @@ In the folder `ext`, you will find various extensions, and They export(using `Ex
     - Game-UI
     - Game-Controller
     - Game-Scene
-    - Vector
-    - Position
+    - Game
 - ext\LocalStore\Hit.LocalStore.js
     - LocalStore
 - ext\msgBox\Hit.msgBox.js
