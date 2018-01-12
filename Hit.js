@@ -545,7 +545,7 @@ if (!('Map' in window)) {
         if (initialVal) {
             Loop.each(initialVal, function (pair) {
                 this.set(pair[0], pair[1]);
-            });
+            }, this);
         }
     };
 }
@@ -578,13 +578,13 @@ if (!('Set' in window)) {
         this.has = function (value) {
             return values.includes(value);
         };
-        this.set = function (value) {
+        this.add = function (value) {
             this.delete(value);
             values.push(value);
             return this;
         };
         if (initialVal) {
-            Loop.each(initialVal, this.set);
+            Loop.each(initialVal, this.add, this);
         }
     };
 }
