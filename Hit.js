@@ -63,8 +63,8 @@ var Loop = {
     },
     /**
      * @description A method like Array.prototype.map
-     * @argument {Array|Object} arr The object to traversal.
-     * @argument {(value, index, arr) => any} callback The function to receive the elements and return something as part of the result.
+     * @param {Array|Object} arr The object to traversal.
+     * @param {(value, index, arr) => any} callback The function to receive the elements and return something as part of the result.
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {Array<any>} The result contains the values returned by callback.
      */
@@ -86,8 +86,8 @@ var Loop = {
     },
     /**
      * @description A method like Array.prototype.filter
-     * @argument {Array|Object} arr The object to traversal.
-     * @argument {(value, index, arr) => boolean} callback The function to tell whether the element should be preserved.
+     * @param {Array|Object} arr The object to traversal.
+     * @param {(value, index, arr) => boolean} callback The function to tell whether the element should be preserved.
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {Array<any>} The result contains all the values filtered by callback.
      */
@@ -112,8 +112,8 @@ var Loop = {
     },
     /**
      * @description A method like Array.prototype.find
-     * @argument {Array|Object} arr The object to traversal.
-     * @argument {(value, index, arr) => boolean} callback The function to tell whether the element matches the condition.
+     * @param {Array|Object} arr The object to traversal.
+     * @param {(value, index, arr) => boolean} callback The function to tell whether the element matches the condition.
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {any} The element matches the condition.
      */
@@ -131,8 +131,8 @@ var Loop = {
     },
     /**
      * @description A method like Array.prototype.findIndex
-     * @argument {Array|Object} arr The object to traversal.
-     * @argument {(value, index, arr) => boolean} callback The function to tell whether the element matches the condition.
+     * @param {Array|Object} arr The object to traversal.
+     * @param {(value, index, arr) => boolean} callback The function to tell whether the element matches the condition.
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {number|string} The index/key of the element which matches the condition.
      */
@@ -150,8 +150,8 @@ var Loop = {
     },
     /**
      * @description A method like Array.prototype.some
-     * @argument {Array|Object} arr The object to traversal.
-     * @argument {(value, index, arr) => boolean} callback The function to tell whether the element matches the condition.
+     * @param {Array|Object} arr The object to traversal.
+     * @param {(value, index, arr) => boolean} callback The function to tell whether the element matches the condition.
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {boolean} Whether there is any element matches the condition.
      */
@@ -169,8 +169,8 @@ var Loop = {
     },
     /**
      * @description A method like Array.prototype.every
-     * @argument {Array|Object} arr The object to traversal.
-     * @argument {(value, index, arr) => boolean} callback The function to tell whether the element matches the condition.
+     * @param {Array|Object} arr The object to traversal.
+     * @param {(value, index, arr) => boolean} callback The function to tell whether the element matches the condition.
      * @param {any} thisArg The "this" argument of "callback".
      * @returns {boolean} Whether there all the elements match the condition.
      */
@@ -185,6 +185,39 @@ var Loop = {
             return flag;
         }
         return true;
+    },
+    /**
+     * @description To repeat the callback function.
+     * @param {number|Object} config Repeating config. (Can simply giving a number as repeating count.)
+     * @param {number} config.from The start value.
+     * @param {number} config.to The end value.
+     * @param {number} config.step The step.
+     */
+    repeat: function (config, callback, thisArg) {
+        if (typeof config === 'number') {
+            return Loop.repeat({
+                to: config - 1
+            }, callback, thisArg);
+        } else {
+            if (!(config instanceof Object && config.step !== 0 && 'to' in config)) {
+                return;
+            }
+            if (typeof config.from !== 'number') {
+                config.from = 1;
+            }
+            if (typeof config.step !== 'number') {
+                config.step = Math.sign(config.to - config.from);
+            }
+            if (config.step > 0) {
+                for (var i = config.from; i <= config.to; i += config.step) {
+                    callback.call(thisArg, i);
+                }
+            } else {
+                for (var i = config.from; i >= config.to; i += config.step) {
+                    callback.call(thisArg, i);
+                }
+            }
+        }
     }
 };
 
@@ -305,6 +338,171 @@ Loop.each({
         value: v,
         enumerable: false
     });
+});
+Object.defineProperties(Array.prototype, {
+    /**
+     * @description Point to the first element of the array.
+     */
+    first: { get: function () { return this.length > 0 ? this[0] : undefined; } },
+    /**
+     * @description Point to the last element of the array.
+     */
+    last: { get: function () { return this.length > 0 ? this[this.length - 1] : undefined; } }
+});
+
+// extend Array
+Loop.each({
+    /**
+     * @description To get a range. (By the way, if you give only 1 parameter, the number will be use as `to` and `from` will be 1.)
+     * @param {number} from The start value.
+     * @param {number} to The end value.
+     * @param {number} step The step.
+     * @returns {Array<number>} The result.
+     */
+    range: function (from, to, step) {
+        var ans = [],
+            len = arguments.length;
+        Loop.repeat({
+            from: len > 1 ? from : 1,
+            to: len > 1 ? to : from,
+            step: step
+        }, function (i) {
+            ans.push(i);
+        });
+        return ans;
+    }
+}, function (v, k) {
+    Array[k] = v;
+});
+
+// extend Math
+Loop.each({
+    /**
+     * @description To get the element in the middle of an array.
+     * @param {ArrayLike<number>} arr An array.
+     * @param {boolean} sort Whether to sort the array.
+     * @returns {number} The element in the middle of the array.
+     */
+    mid: function (arr, sort) {
+        arr = Array.from(arr);
+        if (sort !== false) {
+            arr = arr.sort(function (a, b) {
+                return a - b;
+            });
+        }
+        var len = arr.length;
+        if (len & 1) {
+            len -= 1;
+        }
+        return arr[len / 2];
+    },
+    /**
+     * @description To get the medium one.
+     * @param {number} a One of the three numbers to compare.
+     * @param {number} b One of the three numbers to compare.
+     * @param {number} c One of the three numbers to compare.
+     * @returns {number} The medium one.
+     */
+    med: function (a, b, c) {
+        return Math.mid([a, b, c]);
+    },
+    /**
+     * @description To get the result of a*k+b*(1-k). (k >= 0 && k <= 1)
+     * @param {number} a One number to mix.
+     * @param {number} b Another number to mix.
+     * @param {number} k The ratio of mixing.
+     * @returns {number} The result of mixing.
+     */
+    mix: function (a, b, k) {
+        if (k > 1 || k < 0) {
+            return NaN;
+        }
+        return a * k + b * (1 - k);
+    },
+    /**
+     * @description To cut the decimal part.
+     * @param {number} num The number.
+     * @param {number} len The target length of the decimal part. (Default value is 0.)
+     * @returns {number} The result.
+     */
+    cut: function (num, len) {
+        if (typeof num !== 'number') {
+            return NaN;
+        }
+        if (!(len >= 0)) {
+            len = 0;
+        }
+        num = num + '';
+        var index = num.indexOf('.');
+        if (index !== -1) {
+            num = num.split('');
+            num.splice(index + len + 1);
+            num = num.join('');
+        }
+        return num - 0;
+    },
+    /**
+     * @description To calculate the distance between (x0, y0) and (x1, y1).
+     * @param {number} x0 The x of the first point.
+     * @param {number} y0 The y of the first point.
+     * @param {number} x1 The x of the second point.
+     * @param {number} y1 The y of the second point.
+     * @returns {number} The distance.
+     */
+    distance: function (x0, y0, x1, y1) {
+        return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
+    },
+    /**
+     * @description To calculate the distance between p0 and p1.
+     * @param {{x: number, y: number}} p0 The first point.
+     * @param {{x: number, y: number}} p1 The second point.
+     * @returns {number} The distance.
+     */
+    distance_p: function (p0, p1) {
+        return Math.distance(p0.x, p0.y, p1.x, p1.y);
+    },
+    /**
+     * @description To calculate the distance between (x0, y0, z0) and (x2, y2, z2).
+     * @param {number} x0 The x of the first point.
+     * @param {number} y0 The y of the first point.
+     * @param {number} z0 The z of the first point.
+     * @param {number} x1 The x of the second point.
+     * @param {number} y1 The y of the second point.
+     * @param {number} z1 The z of the second point.
+     * @returns {number} The distance.
+     */
+    distance3d: function (x0, y0, z0, x1, y1, z1) {
+        return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2) + Math.pow(z0 - z1, 2));
+    },
+    /**
+     * @description To calculate the distance between p0 and p1.
+     * @param {{x: number, y: number, z:number}} p0 The first point.
+     * @param {{x: number, y: number, z:number}} p1 The second point.
+     * @returns {number} The distance.
+     */
+    distance3d_p: function (p0, p1) {
+        return Math.distance3d(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
+    },
+    /**
+     * @description To get a random value between min and max.
+     * @param {number} min
+     * @param {number} max
+     * @returns {number} The result.
+     */
+    rand: function (min, max) {
+        return min + Math.random() * (max - min);
+    },
+    /**
+     * @description To get a random integer between min and max.
+     * @param {number} min
+     * @param {number} max
+     * @returns {number} The result.
+     */
+    randInt: function (min, max) {
+        return Math.round(min + Math.random() * (max - min));
+    }
+}, function (v, k) {
+    Math[k] = v;
 });
 
 // extend functions
@@ -910,148 +1108,6 @@ Agency.bind = function (obj) {
     return obj;
 };
 
-// extend Math
-Loop.each({
-    /**
-     * @description To get the element in the middle of an array.
-     * @param {ArrayLike<number>} arr An array.
-     * @param {boolean} sort Whether to sort the array.
-     * @returns {number} The element in the middle of the array.
-     */
-    mid: function (arr, sort) {
-        arr = Array.from(arr);
-        if (sort !== false) {
-            arr = arr.sort(function (a, b) {
-                return a - b;
-            });
-        }
-        var len = arr.length;
-        if (len & 1) {
-            len -= 1;
-        }
-        return arr[len / 2];
-    },
-    /**
-     * @description To get the medium one.
-     * @argument {number} a One of the three numbers to compare.
-     * @argument {number} b One of the three numbers to compare.
-     * @param {number} c One of the three numbers to compare.
-     * @returns {number} The medium one.
-     */
-    med: function (a, b, c) {
-        return Math.mid([a, b, c]);
-    },
-    /**
-     * @description To get the result of a*k+b*(1-k). (k >= 0 && k <= 1)
-     * @argument {number} a One number to mix.
-     * @argument {number} b Another number to mix.
-     * @param {number} k The ratio of mixing.
-     * @returns {number} The result of mixing.
-     */
-    mix: function (a, b, k) {
-        if (k > 1 || k < 0) {
-            return NaN;
-        }
-        return a * k + b * (1 - k);
-    },
-    /**
-     * @description To cut the decimal part.
-     * @param {number} num The number.
-     * @param {number} len The target length of the decimal part. (Default value is 0.)
-     * @returns {number} The result.
-     */
-    cut: function (num, len) {
-        if (typeof num !== 'number') {
-            return NaN;
-        }
-        if (!(len >= 0)) {
-            len = 0;
-        }
-        num = num + '';
-        var index = num.indexOf('.');
-        if (index !== -1) {
-            num = num.split('');
-            num.splice(index + len + 1);
-            num = num.join('');
-        }
-        return num - 0;
-    },
-    /**
-     * @description To calculate the distance between (x0, y0) and (x1, y1).
-     * @param {number} x0 The x of the first point.
-     * @param {number} y0 The y of the first point.
-     * @param {number} x1 The x of the second point.
-     * @param {number} y1 The y of the second point.
-     * @returns {number} The distance.
-     */
-    distance: function (x0, y0, x1, y1) {
-        return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
-    },
-    /**
-     * @description To calculate the distance between p0 and p1.
-     * @param {{x: number, y: number}} p0 The first point.
-     * @param {{x: number, y: number}} p1 The second point.
-     * @returns {number} The distance.
-     */
-    distance_p: function (p0, p1) {
-        return Math.distance(p0.x, p0.y, p1.x, p1.y);
-    },
-    /**
-     * @description To calculate the distance between (x0, y0, z0) and (x2, y2, z2).
-     * @param {number} x0 The x of the first point.
-     * @param {number} y0 The y of the first point.
-     * @param {number} z0 The z of the first point.
-     * @param {number} x1 The x of the second point.
-     * @param {number} y1 The y of the second point.
-     * @param {number} z1 The z of the second point.
-     * @returns {number} The distance.
-     */
-    distance3d: function (x0, y0, z0, x1, y1, z1) {
-        return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2) + Math.pow(z0 - z1, 2));
-    },
-    /**
-     * @description To calculate the distance between p0 and p1.
-     * @param {{x: number, y: number, z:number}} p0 The first point.
-     * @param {{x: number, y: number, z:number}} p1 The second point.
-     * @returns {number} The distance.
-     */
-    distance3d_p: function (p0, p1) {
-        return Math.distance3d(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
-    },
-    /**
-     * @description To get a random value between min and max.
-     * @param {number} min
-     * @param {number} max
-     * @returns {number} The result.
-     */
-    rand: function (min, max) {
-        return min + Math.random() * (max - min);
-    },
-    /**
-     * @description To get a random integer between min and max.
-     * @param {number} min
-     * @param {number} max
-     * @returns {number} The result.
-     */
-    randInt: function (min, max) {
-        return Math.round(min + Math.random() * (max - min));
-    }
-}, function (v, k) {
-    Math[k] = v;
-});
-
-// extend Array
-Object.defineProperties(Array.prototype, {
-    /**
-     * @description Point to the first element of the array.
-     */
-    first: { get: function () { return this.length > 0 ? this[0] : undefined; } },
-    /**
-     * @description Point to the last element of the array.
-     */
-    last: { get: function () { return this.length > 0 ? this[this.length - 1] : undefined; } }
-});
-
 /** @description This object has some methods or constructors about DOM. */
 var DOM = {
     /**
@@ -1104,9 +1160,9 @@ var DOM = {
     },
     /**
      * @description Dispatch an event to the element.
-     * @argument {Element} ele The element.
-     * @argument {string} type Event type.
-     * @argument {boolean} cancelable Whether the event is cancelable.
+     * @param {Element} ele The element.
+     * @param {string} type Event type.
+     * @param {boolean} cancelable Whether the event is cancelable.
      * @param {boolean} canBubble Whether the event can bubble.
      * @returns {boolean} Whether the event is successfully dispatched.
      */
@@ -1532,7 +1588,7 @@ Element.prototype.appendTo = function (parent) {
 };
 /**
  * @description To get/set an attribute of the element.
- * @argument {string} name The name of the attribute.
+ * @param {string} name The name of the attribute.
  * @param {string|undefined} value The value of the attribute.
  * @returns {string|Element} Return the value of the attribute if the value is not given, self otherwise.
  */
@@ -1546,7 +1602,7 @@ Element.prototype.attr = function (name, value) {
 };
 /**
  * @description To get/set the style of the element.
- * @argument {string} name The name of the style.
+ * @param {string} name The name of the style.
  * @param {string|undefined} value The value of the style.
  * @returns {string|Element} Return the value of the style if the value is not given, self otherwise.
  */
@@ -1670,7 +1726,7 @@ Element.prototype.next = function () {
 };
 /**
  * @description To set the scroll offset of the element.
- * @argument {number} offsetX The offset x.
+ * @param {number} offsetX The offset x.
  * @param {number|undefined} offsetY The offset y. Will set to offsetX if the value is not given.
  * @returns {Element} Self.
  */
@@ -1684,7 +1740,7 @@ Element.prototype.scroll = function (offsetX, offsetY) {
 };
 /**
  * @description To insert to the children of another element.
- * @argument {number} index The index.
+ * @param {number} index The index.
  * @param {Element} parent The parent element.
  * @returns {Element} Self.
  */
@@ -1694,7 +1750,7 @@ Element.prototype.insertTo = function (index, parent) {
 };
 /**
  * @description To insert an element to the children of the element.
- * @argument {number} index The index.
+ * @param {number} index The index.
  * @param {Element} child The child element.
  * @returns {Element} Self.
  */
@@ -1813,8 +1869,8 @@ Loop.each([
     };
     /**
      * @description To remove a listener from the object.
-     * @argument {string} type Event type.
-     * @argument {(e: Event) => any} listener The listener.
+     * @param {string} type Event type.
+     * @param {(e: Event) => any} listener The listener.
      * @param {boolean} useCapture Whether to use capture.
      * @returns {O} Self.
      */
@@ -1831,8 +1887,8 @@ Loop.each([
     Loop.each({
         /**
          * @description Add listener to the object. If the type has not been defined in DOM.CustomEvents, this method equals O.prototype.listen.
-         * @argument {string} type Custom event type.
-         * @argument {(e: Event) => any} listener The listener.
+         * @param {string} type Custom event type.
+         * @param {(e: Event) => any} listener The listener.
          * @param {boolean} useCapture Whether to use capture.
          * @returns {O} Self.
          */
@@ -1846,8 +1902,8 @@ Loop.each([
         },
         /**
          * @description To trigger an event.
-         * @argument {string} type Event type.
-         * @argument {boolean} cancelable Whether the event is cancelable.
+         * @param {string} type Event type.
+         * @param {boolean} cancelable Whether the event is cancelable.
          * @param {boolean} canBubble Whether the event can bubble.
          * @returns {boolean} Whether the event is successfully dispatched.
          */
@@ -2088,9 +2144,9 @@ var Script = {
     },
     /**
      * @description The method to load script files.
-     * @argument {Array} url The urls of the script files.
-     * @argument {boolean} sequentially Whether to load the script files in sequence.
-     * @argument {string} type The type of the script files.
+     * @param {Array} url The urls of the script files.
+     * @param {boolean} sequentially Whether to load the script files in sequence.
+     * @param {string} type The type of the script files.
      * @param {boolean} useIncludePath Whether to use the include path.
      * @returns {Promise} The promise tells whether all the script files have loaded successfully.
      */
@@ -2118,8 +2174,8 @@ var Script = {
     },
     /**
      * @description The method to load script files in group.
-     * @argument {Array} url The array of the url groups of the script files.
-     * @argument {string} type The type of the script files.
+     * @param {Array} url The array of the url groups of the script files.
+     * @param {string} type The type of the script files.
      * @param {boolean} useIncludePath Whether to use the include path.
      * @returns {Promise} The promise tells whether all the script file groups have loaded successfully.
      */
