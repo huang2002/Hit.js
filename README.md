@@ -24,6 +24,7 @@ It is a javascript lib which not only defines some useful methods and constructo
     - findIndex
     - some
     - every
+    - repeat
 - Compare
     - isNaN
     - equal
@@ -97,6 +98,8 @@ It is a javascript lib which not only defines some useful methods and constructo
 - Array.prototype.
     - randEle
     - replaceWith
+- Array
+    - range
 - Math.
     - mid
     - med
@@ -111,7 +114,7 @@ It is a javascript lib which not only defines some useful methods and constructo
 
 ## Extensions
 
-In the folder `ext`, you will find various extensions, and They export(using `Extension.*`) different things. You can read the comments in each file to learn what they exported and use `Extension.*` to employ them.
+In the folder `ext`, you will find various extensions, and They export(using `Extension.*`) different things. You can read the comments in each file to learn what they exported, and use `Extension.*` to employ them.
 
 ### Some extensions:
 
@@ -131,6 +134,4 @@ In the folder `ext`, you will find various extensions, and They export(using `Ex
 - ext\Canvas\Hit.Canvas.js
 - ext\top\Hit.top.js
 
-## Try it :D
-
-Welcome to point out my mistakes. That will help me do better.
+## Try it :)
