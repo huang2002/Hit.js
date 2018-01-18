@@ -9,7 +9,6 @@ It is a javascript lib which not only defines some useful methods and constructo
 ### Some constructors in Hit.js:
 
 - Constructor
-- Sequence
 - ObjectPool
 - Agency
 - Ani.Frame
@@ -118,6 +117,9 @@ In the folder `ext`, you will find various extensions, and They export(using `Ex
 
 ### Some extensions:
 
+- ext\Beeper\Hit.Beeper.js
+    - Beeper
+- ext\Canvas\Hit.Canvas.js
 - ext\Game\Hit.Game.js
     - Game-UI
     - Game-Controller
@@ -127,11 +129,10 @@ In the folder `ext`, you will find various extensions, and They export(using `Ex
     - LocalStore
 - ext\msgBox\Hit.msgBox.js
     - msgBox
-- ext\Beeper\Hit.Beeper.js
-    - Beeper
 - ext\range-input\Hit.range-input.js
 - ext\range-value\Hit.range-value.js
-- ext\Canvas\Hit.Canvas.js
+- ext\Sequence\Hit.Sequence.js
+    - Sequence
 - ext\top\Hit.top.js
 
 ## Try it :)

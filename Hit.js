@@ -196,14 +196,14 @@ var Loop = {
     repeat: function (config, callback, thisArg) {
         if (typeof config === 'number') {
             return Loop.repeat({
-                to: config - 1
+                to: config
             }, callback, thisArg);
         } else {
             if (!(config instanceof Object && config.step !== 0 && 'to' in config)) {
                 return;
             }
             if (typeof config.from !== 'number') {
-                config.from = 1;
+                config.from = Math.sign(config.to);
             }
             if (typeof config.step !== 'number') {
                 config.step = Math.sign(config.to - config.from);
@@ -619,53 +619,6 @@ var ObjectPool = new Constructor(
     }
 );
 
-/**
- * @description The constructor of sequences.
- * @param {number} delay The delay.
- * @param {Function} callback The callback.
- */
-var Sequence = new Constructor(
-    function (delay, callback) {
-        this._callbacks = [];
-        this._delays = [];
-        this._offset = 0;
-        if (callback && delay !== undefined) {
-            this.next(delay, callback);
-        }
-    }, {
-        /**
-         * @description To set the next callback and delay.
-         * @param {number} delay The delay.
-         * @param {Function} callback The callback.
-         * @returns {Sequence} Self.
-         */
-        next: function (delay, callback) {
-            this._callbacks.push(callback);
-            this._delays.push(delay + this._offset);
-            this._offset += delay;
-            return this;
-        },
-        /**
-         * @description To execute the sequence.
-         * @returns {Array<number>} The IDs returned by setTimeout.
-         */
-        execute: function () {
-            return Loop.map(this._callbacks, function (callback, i) {
-                return setTimeout(callback, this._delays[i]);
-            }, this);
-        }
-    }
-);
-/**
- * @description To create a new sequence.
- * @param {number} delay The delay.
- * @param {Function} callback The callback.
- * @returns {Sequence} The sequence.
- */
-Sequence.create = function (delay, callback) {
-    return new Sequence(delay, callback);
-};
-
 //#region - fix
 
 // fix Array
@@ -798,7 +751,7 @@ if (!('Promise' in window)) {
         this.then = function (onfulfilled, onrejected) {
             if (onrejected) {
                 if (status === 'rejected') {
-                    setTimeout(onrejected, 0, value);
+                    setTimeout(onrejected, 0, reason);
                 } else {
                     onrejectedCallbacks.push(onrejected);
                 }
@@ -849,7 +802,7 @@ if (!('Promise' in window)) {
                 }, function (reason) {
                     status = 'rejected';
                     value = reason;
-                    var callbacks = onrejectedCallbacks.length > 0 ? onrejectedCallbacks : onerrorCallbacks;
+                    var callbacks = (!(reason instanceof Error)) && (onrejectedCallbacks.length > 0) ? onrejectedCallbacks : onerrorCallbacks;
                     for (var i = 0; i < callbacks.length; i++) {
                         callbacks[i](value);
                     }
@@ -860,10 +813,20 @@ if (!('Promise' in window)) {
 }
 if (!('done' in Promise.prototype)) {
     Promise.prototype.done = function (onfulfilled, onrejected) {
-        this.then(onfulfilled, onrejected)
-            .catch(function (err) {
-                throw err;
-            });
+        this.then(
+            onfulfilled, onrejected
+        ).catch(function (err) {
+            throw err;
+        });
+    };
+}
+if (!('finally' in Promise.prototype)) {
+    Promise.prototype.finally = function (callback) {
+        var fn = function () {
+            callback();
+        };
+        this.then(fn, fn);
+        return Promise.resolve();
     };
 }
 if (!('reject' in Promise)) {
@@ -879,7 +842,11 @@ if (!('resolve' in Promise)) {
             resolve(data);
         });
     };
-
+}
+if (!('try' in Promise)) {
+    Promise.try = function (callback) {
+        return Promise.resolve().then(callback);
+    };
 }
 if (!('all' in Promise)) {
     Promise.all = function (promises) {
