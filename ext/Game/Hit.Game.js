@@ -1,18 +1,17 @@
 /**
  * @file Hit.Game.js
  * @see https://github.com/huang2002/Hit.js
- * @requires OC.js (https://github.com/huang2002/ObjectiveCanvas.js)
  * @author hhh
  * @overview This file defined some constructors about 2D games, and you can use them to make you 2D games.
  */
 
-if (!('OC' in window)) {
-    throw new Error('Please load OC.js first!');
-}
+/**
+ * @typedef {Object} Drawable Objects that have a 'draw' method. (The renderer will call the 'draw' method on the items to render them on the canvas. You can employ 'ObjectiveCanvas' to create such objects easily: https://github.com/huang2002/ObjectiveCanvas.js.)
+ */
 
 /**
  * @description The constructor of scenes.
- * @property {Array<OC.Object>} items The items.
+ * @property {Array<Drawable>} items The items.
  * @property {string} bg The background fillStyle.
  * @property {number} fps The fps of the scene.
  * @method listen To listen events of the scene.
@@ -32,7 +31,7 @@ Extension.export('Game-Scene',
         }, {
             /**
              * @description To add an item.
-             * @param {OC.Object} item The item.
+             * @param {Drawable} item The item.
              * @returns {Scene} Self.
              */
             add: function (item) {
@@ -41,7 +40,7 @@ Extension.export('Game-Scene',
             },
             /**
              * @description To remove an item.
-             * @param {OC.Object} item The item.
+             * @param {Drawable} item The item.
              * @returns {Scene} Self.
              */
             remove: function (item) {
@@ -90,10 +89,11 @@ Extension.export('Game-Controller',
             if (!game) {
                 return null;
             }
-            this.frame = new Ani.Frame();
+            var frame = new Ani.Frame();
+            this.frame = frame;
             this.scene = null;
             var self = this;
-            this.frame.listen('update', function () {
+            frame.listen('update', function () {
                 if (!self.scene) {
                     return;
                 }
@@ -101,11 +101,29 @@ Extension.export('Game-Controller',
                     UI = game.UI,
                     scene = self.scene;
                 if (scene.fps > 0) {
-                    self.frame.fps = scene.fps;
+                    frame.fps = scene.fps;
                 }
                 scene.drawBg(ctx, UI);
                 scene._agency.trigger('update');
                 scene.draw(ctx);
+                if (game.debugInfo) {
+                    ctx.save();
+                    ctx.font = game.debugInfoFont;
+                    ctx.fillStyle = game.debugInfoColor;
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+                    var x = game.debugInfoX,
+                        y = game.debugInfoY,
+                        lineHeight = game.debugInfoLineHeight;
+                    Loop.each([
+                        'frame duration: ' + frame.lastFrameDuration,
+                        'real fps:       ' + Math.round(1000 / frame.lastUpdateGap),
+                        'items count:    ' + scene.items.length
+                    ], function (text, i) {
+                        ctx.fillText(text, x, y + lineHeight * i);
+                    });
+                    ctx.restore();
+                }
             });
             this.listenType = function (type) {
                 window.listen(type, function (e) {
@@ -252,6 +270,12 @@ Extension.define('Game', [
             this.context = this._canvas.getContext('2d');
             this.controller = new Controller(this);
             this.UI = new UI(this);
+            this.debugInfo = false;
+            this.debugInfoFont = '22px Consolas';
+            this.debugInfoColor = '#00f';
+            this.debugInfoLineHeight = 25;
+            this.debugInfoX = 10;
+            this.debugInfoY = 10;
         }, {
             /**
              * @description To init the game.

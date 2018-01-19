@@ -1242,9 +1242,9 @@ var Ani = {
      * @description The constructor of animation frames.
      * @property {number} fps How many times the frame will be updated per second.
      * @property {boolean} isRunning Whether the frame is running.
-     * @property {number} lastUpdateTime Last time the frame is updated.
-     * @property {number} lastUpdateGap Last gap the frame is updated.
-     * @property {number} lastFrameDuration Last duration the frame lasts.
+     * @property {number} lastUpdateTime The time when the last frame is updated.
+     * @property {number} lastUpdateGap The gap between the last two frames .
+     * @property {number} lastFrameDuration The duration which the last frame lasts.
      * @method start To start updating the frame.
      * @method stop To stop updating the frame.
      * @method listen To add a listener to the frame.
