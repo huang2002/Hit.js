@@ -267,7 +267,7 @@ Extension.define('Beeper', [], function () {
         return sequence;
     };
 
-    // scale (C, S->#)
+    // scale (C major; S=#)
     Beeper.SCALE = {
         L1: 262,
         L1S: 277,
