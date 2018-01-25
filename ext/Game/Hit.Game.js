@@ -392,13 +392,11 @@ Extension.define('Game', [
         },
         // Will make the canvas cover the window.
         MAX: function (UI) {
-            UI.width = window.innerWidth - UI.padding * 2
-            UI.height = window.innerHeight - UI.padding * 2
             return {
                 left: UI.padding,
                 top: UI.padding,
-                width: UI.width,
-                height: UI.height
+                width: UI.width = window.innerWidth - UI.padding * 2,
+                height: UI.height = window.innerHeight - UI.padding * 2
             };
         }
     }, function (method, name) {

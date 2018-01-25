@@ -1,6 +1,6 @@
 # Hit.js
 
-> A useful javascript lib.
+> A simple javascript lib.
 
 ## What's Hit.js?
 
@@ -133,6 +133,8 @@ In the folder `ext`, you will find various extensions, and They export(using `Ex
 - ext\range-value\Hit.range-value.js
 - ext\Sequence\Hit.Sequence.js
     - Sequence
+- ext\World\Hit.World.js
+    - World
 - ext\top\Hit.top.js
 
 ## Try it :)

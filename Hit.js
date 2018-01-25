@@ -187,11 +187,14 @@ var Loop = {
         return true;
     },
     /**
-     * @description To repeat the callback function.
+     * @description To repeat the callback function and returns the answers.
      * @param {number|Object} config Repeating config. (Can simply giving a number as repeating count.)
      * @param {number} config.from The start value.
      * @param {number} config.to The end value.
      * @param {number} config.step The step.
+     * @param {(i:number)=>any} callback The callback function.
+     * @param {any} thisArg The this argument.
+     * @returns {Array} The answers returned by callback.
      */
     repeat: function (config, callback, thisArg) {
         if (typeof config === 'number') {
@@ -208,15 +211,17 @@ var Loop = {
             if (typeof config.step !== 'number') {
                 config.step = Math.sign(config.to - config.from);
             }
+            var ans = [];
             if (config.step > 0) {
                 for (var i = config.from; i <= config.to; i += config.step) {
-                    callback.call(thisArg, i);
+                    ans.push(callback.call(thisArg, i));
                 }
             } else {
                 for (var i = config.from; i >= config.to; i += config.step) {
-                    callback.call(thisArg, i);
+                    ans.push(callback.call(thisArg, i));
                 }
             }
+            return ans;
         }
     }
 };
@@ -332,6 +337,23 @@ Loop.each({
             }
         }
         return ans;
+    },
+    /**
+     * @description To remove an element of the array and return it.
+     * @param {number} index The index of the element.
+     * @returns {any} The element.
+     */
+    delIndex: function (index) {
+        return this.splice(index, 1);
+    },
+    /**
+     * @description To get the element at the index.
+     * @param {number} index The index. (Negative index accepted.)
+     * @returns {any} The element.
+     */
+    at: function (index) {
+        index %= this.length;
+        return index >= 0 ? this[index] : this[this.length + index];
     }
 }, function (v, k) {
     Object.defineProperty(Array.prototype, k, {
@@ -920,11 +942,10 @@ if (!('stopPropagation' in Event.prototype)) {
 }
 
 // fix Math
-if (!('SQRT2' in Math)) {
-    Math.SQRT2 = Math.sqrt(2);
-}
-if (!('SQRT1_2' in Math)) {
-    Math.SQRT1_2 = Math.sqrt(.5);
+if (!('sign' in Math)) {
+    Math.sign = function (num) {
+        return num === 0 ? 0 : num > 0 ? 1 : -1;
+    };
 }
 
 //#endregion
