@@ -13,7 +13,7 @@ DOM.ready(function () {
 
     ele.attr('title', '返回顶部');
 
-    ele.html('<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"><path d="M 15 30 L 25 17 L 35 30" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>');
+    ele.html('<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 50 50"><path d="M 15 30 L 25 17 L 35 30" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>');
 
     ele.listen('click', function () {
         fadeOut();
