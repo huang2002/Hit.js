@@ -50,11 +50,13 @@ Extension.define('World', [], function () {
             collideWith: function (item) {
                 var tag = item.tag,
                     listeners = this.collisionListeners;
-                if (tag in listeners) {
-                    listeners[tag].forEach(function (callback) {
-                        callback(item);
-                    });
-                }
+                Loop.each([tag, '*'], function (t) {
+                    if (t in listeners) {
+                        listeners[t].forEach(function (callback) {
+                            callback(item);
+                        });
+                    }
+                });
                 return this;
             }
         }
@@ -81,7 +83,7 @@ Extension.define('World', [], function () {
                 return this;
             },
             /**
-             * @description To update the world and check the collisions.
+             * @description To update the world and check the collisions. (The items will receive an update event.)
              * @param {number} ratio [Optional] The ratio. (The ratio that the items receive will be updateBasis/updateGap*ratio)
              * @returns {World} The world itself.
              */
@@ -278,8 +280,8 @@ Extension.define('World', [], function () {
     var Outline = World.Outline = new Constructor(
         function (vertices) {
             this.vertices = vertices || [];
-            this.strokeStyle = 'rgba(0,0,255,.9)';
-            this.fillStyle = 'rgba(33,144,255,.1)';
+            this.strokeStyle = 'rgba(0,255,0,.9)';
+            this.fillStyle = 'rgba(0,225,255,.1)';
         }, {
             /**
              * @description To add a new vertex.
@@ -666,6 +668,15 @@ Extension.define('World', [], function () {
         x /= len;
         y /= len;
         return new Vector(x, y);
+    };
+    /**
+     * @description To create a vector from two points. (p1->p2)
+     * @param {{x:number,y:number}} p1 The first point.
+     * @param {{x:number,y:number}} p2 The second point.
+     * @returns {Vector} The result.
+     */
+    Vector.fromPoints = function (p1, p2) {
+        return new Vector(p2.x - p1.x, p2.y - p1.y);
     };
 
     /**

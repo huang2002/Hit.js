@@ -2160,7 +2160,7 @@ var Script = {
                 var ans = [];
                 var next = function () {
                     if (urls.length <= 0) {
-                        resolve(ans);
+                        return resolve(ans);
                     }
                     var url = urls.shift();
                     Script.loadOne(url, type, useIncludePath).then(function (data) {
@@ -2188,7 +2188,7 @@ var Script = {
             var ans = [];
             var next = function () {
                 if (urlArr.length <= 0) {
-                    resolve(ans);
+                    return resolve(ans);
                 }
                 var urls = urlArr.shift();
                 Script.loadSome(urls, false, type, useIncludePath).then(function (data) {
