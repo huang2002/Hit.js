@@ -88,7 +88,7 @@ Extension.define('World', [], function () {
             update: function (ratio) {
                 var now = +new Date(),
                     gap = now - this.lastUpdateTime,
-                    rat = this.updateBasis / gap;
+                    rat = gap / this.updateBasis;
                 if (typeof ratio === 'number') {
                     rat *= ratio;
                 }
@@ -141,7 +141,7 @@ Extension.define('World', [], function () {
                                         thatM = thatItem.m,
                                         thatAnsV = ansV.clone().scale(-1);
                                     thatItem.pos.addVec(thatAnsV.clone().scale(thisActive ? .5 : 1));
-                                    thatItem.v.addVec(thatAnsV.setLen(thatV * (thatItem.flex + 1)));
+                                    thatItem.v.addVec(thatAnsV.setLen(thatV * thatItem.flex));
                                     thatItem.a.set(0, 0);
 
                                 }
@@ -150,7 +150,7 @@ Extension.define('World', [], function () {
                                         thisM = thatItem.m,
                                         thisAnsV = ansV;
                                     thisItem.pos.addVec(thisAnsV.clone().scale(thatActive ? .5 : 1));
-                                    thisItem.v.addVec(thisAnsV.setLen(thisV * (thisItem.flex + 1)));
+                                    thisItem.v.addVec(thisAnsV.setLen(thisV * thisItem.flex));
                                     thisItem.a.set(0, 0);
                                 }
                             }
@@ -681,12 +681,12 @@ Extension.define('World', [], function () {
             this.r = 100; // The general size of the item. This helps to improve the collision testing.
             this.active = false; // Whether the item is active. This can help improve the behavior.
             this.penetrative = false; // Whether the item can be penetrated.
-            this.flex = 0; // Affects the collision behavior of the item.
+            this.flex = .5; // Affects the collision behavior of the item.
             this.m = 5;
             this.g = 2;
             this.resistance = .2;
-            this.maxV = 90;
-            this.maxA = 30;
+            this.maxV = 60;
+            this.maxA = 60;
             this.tag = '' + tag;
             this.pos = new Vector();
             this.a = new Vector();
