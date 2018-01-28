@@ -247,8 +247,6 @@ var Compare = {
     }
 };
 
-//#region - extend objects
-
 // Object
 Loop.each({
     /**
@@ -289,8 +287,6 @@ Loop.each({
         enumerable: false
     });
 });
-
-//#endregion
 
 // extend arrays
 Loop.each({
@@ -1169,7 +1165,7 @@ var DOM = {
     },
     /**
      * @description Custom events.
-     * @type {{ [x: string] : (ele: Element, listener: (e) => any, useCapture: boolean) }}
+     * @type {{[e: string]: (ele:Element, listener:(e)=>void, useCapture:boolean), [x: string]: any}}
      */
     CustomEvents: {
         // DOMContentLoaded
@@ -1253,6 +1249,28 @@ var DOM = {
                     y = touches[0] ? touches[0].clientY : null;
                 listener.call(this, e, x, y);
             }, useCapture);
+        },
+        // long press (touch)
+        HOLD_TIME_LIMIT: 500,
+        HOLD_MOVE_LIMIT: 15,
+        hold: function (ele, listener, useCapture) {
+            var id = null,
+                x, y;
+            ele.listen('touchstart', function (e) {
+                id = setTimeout(function () {
+                    listener(e);
+                }, DOM.CustomEvents.HOLD_TIME_LIMIT);
+                x = e.changedTouches[0].clientX;
+                y = e.changedTouches[0].clientY;
+            }, useCapture);
+            function cancel() { clearTimeout(id); }
+            ele.listen('touchend', cancel, useCapture);
+            ele.listen('touchmove', function (e) {
+                if (Math.distance(e.changedTouches[0].clientX, e.changedTouches[0].clientY, x, y) > DOM.CustomEvents.HOLD_MOVE_LIMIT) {
+                    cancel();
+                }
+            }, useCapture);
+            ele.listen('touchcancel', cancel, useCapture);
         }
     }
 };
@@ -1554,13 +1572,11 @@ var Ani = {
     }
 };
 // other timing functions
-Loop.each({
+Ani._set({
     ease: Ani.cubic(.25, 1, .25, 1),
     easeIn: Ani.cubic(.42, 0, 1, 1),
     easeOut: Ani.cubic(0, 0, .58, 1),
     easeInOut: Ani.cubic(.42, 0, .58, 1)
-}, function (v, k) {
-    Ani[k] = v;
 });
 
 //#region - extend elements
@@ -1875,7 +1891,7 @@ Loop.each([
     Loop.each({
         /**
          * @description Add listener to the object. If the type has not been defined in DOM.CustomEvents, this method equals O.prototype.listen.
-         * @param {string} type Custom event type.
+         * @param {string} type Custom event type. (case-insensitive)
          * @param {(e: Event) => any} listener The listener.
          * @param {boolean} useCapture Whether to use capture.
          * @returns {O} Self.
