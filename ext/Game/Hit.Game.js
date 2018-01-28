@@ -271,7 +271,7 @@ Extension.define('Game', [
             this.controller = new Controller(this);
             this.UI = new UI(this);
             this.debugInfo = false;
-            this.debugInfoFont = '22px Consolas';
+            this.debugInfoFont = '18px Consolas';
             this.debugInfoColor = '#00f';
             this.debugInfoLineHeight = 25;
             this.debugInfoX = 10;
