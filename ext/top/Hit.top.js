@@ -16,7 +16,7 @@ DOM.ready(function () {
 
     ele.html('<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 50 50"><path d="M 15 30 L 25 17 L 35 30" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>');
 
-    ele.listen('click', function () {
+    ele.listen('mouseup', function () {
         fadeOut();
         window.scrollTo(0, 0);
     });

@@ -205,6 +205,28 @@ Extension.define('World', [], function () {
                     }
                 });
                 return this;
+            },
+            /**
+             * @description To add an item group.
+             * @param {Group} group The group to add.
+             * @returns {World} The world itself.
+             */
+            addGroup: function (group) {
+                group.items.forEach(function (item) {
+                    this.items.add(item);
+                }, this);
+                return this;
+            },
+            /**
+             * @description To remove an item group.
+             * @param {Group} group The group to remove.
+             * @returns {World} The world itself.
+             */
+            removeGroup: function (group) {
+                group.items.forEach(function (item) {
+                    this.items.delete(item);
+                }, this);
+                return this;
             }
         }, [
             CollisionTarget
@@ -498,6 +520,22 @@ Extension.define('World', [], function () {
             );
         });
     };
+    /**
+     * @description To create an array that contains the vertices of a rectangle.
+     * @param {number} w The width of the rectangle.
+     * @param {number} h The height of the rectangle.
+     * @returns {Array<Vector>} The result.
+     */
+    Outline.rect = function (w, h) {
+        w /= 2;
+        h /= 2;
+        return [
+            -w, -h,
+            w, -h,
+            w, h,
+            -w, h
+        ];
+    };
 
     /**
      * @description The constructor of vectors.
@@ -613,12 +651,14 @@ Extension.define('World', [], function () {
              * @returns {Vector} The vector itself.
              */
             rotRad: function (rad) {
-                var M = Math;
-                rad %= M.PI;
-                var r = this.getRad() + rad,
-                    l = this.getLen();
-                this.x = l * M.sin(r);
-                this.y = -l * M.cos(r);
+                if (this.getLen() > 0) {
+                    var M = Math;
+                    rad %= M.PI;
+                    var r = this.getRad() + rad,
+                        l = this.getLen();
+                    this.x = l * M.sin(r);
+                    this.y = -l * M.cos(r);
+                }
                 return this;
             },
             /**
@@ -782,6 +822,40 @@ Extension.define('World', [], function () {
             CollisionTarget,
             Agency
         ]
+    );
+
+    /**
+     * @description The constructor of item groups. (Please note that a group should be added to a world by world.addGroup().)
+     * @param {Item[]} items [Optional] The items.
+     */
+    var Group = World.Group = new Constructor(
+        function (items) {
+            this.items = new Set(items || []);
+        }, {
+            /**
+             * @description To move the items togother.
+             * @param {number} x The delta x.
+             * @param {number} y The delta y.
+             * @returns {Group} The group itself.
+             */
+            move: function (x, y) {
+                this.items.forEach(function (item) {
+                    item.pos.add(x, y);
+                });
+                return this;
+            },
+            /**
+             * @description To move the items togother by giving a vector.
+             * @param {Vector} v The moving vector.
+             * @returns {Group} The group itself.
+             */
+            moveVec: function (v) {
+                this.items.forEach(function (item) {
+                    item.pos.addVec(v);
+                });
+                return this;
+            }
+        }
     );
 
     return World;

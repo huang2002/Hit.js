@@ -639,7 +639,29 @@ var ObjectPool = new Constructor(
 
 //#region - fix
 
-// fix Array
+// document
+if (!('scrollingElement' in document)) {
+    document.scrollingElement = document.body.scrollTop > 0 ? document.body : document.documentElement;
+}
+
+// Object
+if (!('assign' in Object)) {
+    Object.assign = function (objs) {
+        var o0 = objs[0];
+        Loop.each(arguments, function (o, i) {
+            if (i === 0) {
+                return;
+            }
+            for (var k in o) {
+                if (o.hasOwnProperty(k) && o[k] != null) {
+                    o0[k] = o[k];
+                }
+            }
+        })
+    };
+}
+
+// Array
 if (!('from' in Array)) {
     Array.from = function (arrayLike) {
         return Loop.map(arrayLike, function (e) { return e; });
@@ -656,14 +678,14 @@ if (!('includes' in Array.prototype)) {
     };
 }
 
-// fix strings
+// strings
 if (!('includes' in String.prototype)) {
     String.prototype.includes = function (search, start) {
         return this.slice(start || 0).indexOf(search) !== -1;
     };
 }
 
-// fix Map
+// Map
 if (!('Map' in window)) {
     window.Map = function (initialVal) {
         var keys = [],
@@ -719,7 +741,7 @@ if (!('Map' in window)) {
     };
 }
 
-// fix Set
+// Set
 if (!('Set' in window)) {
     window.Set = function (initialVal) {
         var values = [];
@@ -758,7 +780,7 @@ if (!('Set' in window)) {
     };
 }
 
-// fix Promise
+// Promise
 if (!('Promise' in window)) {
     window.Promise = function (executor) {
         var onfulfilledCallbacks = [],
@@ -907,7 +929,7 @@ if (!('race' in Promise)) {
     };
 }
 
-// fix setImmediate
+// setImmediate
 if (!('setImmediate' in window)) {
     window.setImmediate = function (handler) {
         var args = Array.from(arguments);
@@ -917,7 +939,7 @@ if (!('setImmediate' in window)) {
     window.clearImmediate = window.clearTimeout;
 }
 
-// fix requestAnimationFrame
+// requestAnimationFrame
 if (!('requestAnimationFrame' in window)) {
     window.requestAnimationFrame = function (handler) {
         return setTimeout(handler, 16);
@@ -925,7 +947,7 @@ if (!('requestAnimationFrame' in window)) {
     window.cancelAnimationFrame = window.clearTimeout;
 }
 
-// fix Event
+// Event
 if (!('preventDefault' in Event.prototype)) {
     Event.prototype.preventDefault = function () {
         this.returnValue = false;
@@ -937,7 +959,7 @@ if (!('stopPropagation' in Event.prototype)) {
     };
 }
 
-// fix Math
+// Math
 if (!('sign' in Math)) {
     Math.sign = function (num) {
         return num === 0 ? 0 : num > 0 ? 1 : -1;
@@ -1579,277 +1601,278 @@ Ani._set({
     easeInOut: Ani.cubic(.42, 0, .58, 1)
 });
 
-//#region - extend elements
-
-/**
- * @description Append the element to another element;
- * @param {Element} parent Another element.
- * @returns {Element} Self.
- */
-Element.prototype.appendTo = function (parent) {
-    parent.appendChild(this);
-    return this;
-};
-/**
- * @description To get/set an attribute of the element.
- * @param {string} name The name of the attribute.
- * @param {string|undefined} value The value of the attribute.
- * @returns {string|Element} Return the value of the attribute if the value is not given, self otherwise.
- */
-Element.prototype.attr = function (name, value) {
-    if (arguments.length === 1) {
-        return this.getAttribute(name);
-    } else {
-        this.setAttribute(name, value);
+// extend elements
+Loop.each({
+    /**
+     * @description Append the element to another element;
+     * @param {Element} parent Another element.
+     * @returns {Element} Self.
+     */
+    appendTo: function (parent) {
+        parent.appendChild(this);
         return this;
-    }
-};
-/**
- * @description To get/set the style of the element.
- * @param {string} name The name of the style.
- * @param {string|undefined} value The value of the style.
- * @returns {string|Element} Return the value of the style if the value is not given, self otherwise.
- */
-Element.prototype.css = function (name, value) {
-    if (arguments.length === 1) {
-        return this.style[name];
-    } else {
-        this.style[name] = value;
-        return this;
-    }
-};
-/**
- * @description To get the abbr of the element.
- * @returns {string} The abbr of the element.
- */
-Element.prototype.toAbbr = function () {
-    var id = this.id,
-        cls = Array.from(this.classList).join('.');
-    return this.tagName.toLowerCase() + (id ? '#' + id : '') + (cls ? '.' + cls : '');
-};
-/**
- * @description To add a new class to the element. (Will ignore if the element has the class.)
- * @param {string} name The class name to add.
- * @returns {Element} Self.
- */
-Element.prototype.addClass = function (name) {
-    var classes = this.attr('class');
-    if (!classes) {
-        this.attr('class', name);
-    } else {
-        classes = classes.split(/\s+/);
-        if (classes.indexOf(name) === -1) {
-            classes.push(name);
-            this.attr('class', classes.join(' '));
+    },
+    /**
+     * @description To get/set an attribute of the element.
+     * @param {string} name The name of the attribute.
+     * @param {string|undefined} value The value of the attribute.
+     * @returns {string|Element} Return the value of the attribute if the value is not given, self otherwise.
+     */
+    attr: function (name, value) {
+        if (arguments.length === 1) {
+            return this.getAttribute(name);
+        } else {
+            this.setAttribute(name, value);
+            return this;
         }
-    }
-    return this;
-};
-/**
- * @description To remove a class from the element.
- * @param {string} name The class to remove.
- * @returns {Element} Self.
- */
-Element.prototype.delClass = function (name) {
-    var classArr = (this.attr('class') || '').split(' ');
-    classArr = Loop.filter(classArr, function (c) {
-        return c !== name;
-    });
-    this.attr('class', classArr.join(' '));
-    return this;
-};
-/**
- * @description To change the disabled value of the element.
- * @param {boolean} disabled Whether the element should be disabled. If the value is not given, the method will change the value from true to false (or: from true to false).
- * @returns {Element} Self.
- */
-Element.prototype.disable = function (disabled) {
-    this.disabled = disabled === undefined ? disabled : !this.disabled;
-    return this;
-};
-/**
- * @description To get/set the innerHTML property of the element.
- * @param {string} value The innerHTML value to replace.
- * @returns {Element|string}  If the value is not given, the method will return the innerHTML, the element otherwise.
- */
-Element.prototype.html = function (value) {
-    if (arguments.length === 0) {
-        return this.innerHTML;
-    } else {
-        this.innerHTML = value;
+    },
+    /**
+     * @description To get/set the style of the element.
+     * @param {string} name The name of the style.
+     * @param {string|undefined} value The value of the style.
+     * @returns {string|Element} Return the value of the style if the value is not given, self otherwise.
+     */
+    css: function (name, value) {
+        if (arguments.length === 1) {
+            return this.style[name];
+        } else {
+            this.style[name] = value;
+            return this;
+        }
+    },
+    /**
+     * @description To get the abbr of the element.
+     * @returns {string} The abbr of the element.
+     */
+    toAbbr: function () {
+        var id = this.id,
+            cls = Array.from(this.classList).join('.');
+        return this.tagName.toLowerCase() + (id ? '#' + id : '') + (cls ? '.' + cls : '');
+    },
+    /**
+     * @description To add a new class to the element. (Will ignore if the element has the class.)
+     * @param {string} name The class name to add.
+     * @returns {Element} Self.
+     */
+    addClass: function (name) {
+        var classes = this.attr('class');
+        if (!classes) {
+            this.attr('class', name);
+        } else {
+            classes = classes.split(/\s+/);
+            if (classes.indexOf(name) === -1) {
+                classes.push(name);
+                this.attr('class', classes.join(' '));
+            }
+        }
         return this;
+    },
+    /**
+     * @description To remove a class from the element.
+     * @param {string} name The class to remove.
+     * @returns {Element} Self.
+     */
+    delClass: function (name) {
+        var classArr = (this.attr('class') || '').split(' ');
+        classArr = Loop.filter(classArr, function (c) {
+            return c !== name;
+        });
+        this.attr('class', classArr.join(' '));
+        return this;
+    },
+    /**
+     * @description To change the disabled value of the element.
+     * @param {boolean} disabled Whether the element should be disabled. If the value is not given, the method will change the value from true to false (or: from true to false).
+     * @returns {Element} Self.
+     */
+    disable: function (disabled) {
+        this.disabled = disabled === undefined ? disabled : !this.disabled;
+        return this;
+    },
+    /**
+     * @description To get/set the innerHTML property of the element.
+     * @param {string} value The innerHTML value to replace.
+     * @returns {Element|string}  If the value is not given, the method will return the innerHTML, the element otherwise.
+     */
+    html: function (value) {
+        if (arguments.length === 0) {
+            return this.innerHTML;
+        } else {
+            this.innerHTML = value;
+            return this;
+        }
+    },
+    /**
+     * @description To hide the element.
+     * @returns {Element} Self.
+     */
+    hide: function () {
+        return this.css('display', 'none');
+    },
+    /**
+     * @description To display the Element.
+     * @param {string} display The value of the css attribute 'display' of the element.
+     * @returns {Element} Self.
+     */
+    show: function (display) {
+        display = display || 'block';
+        return this.css('display', display);
+    },
+    /**
+     * @description To remove the element.
+     * @returns {Element} Self.
+     */
+    remove: function () {
+        return this.parentNode.removeChild(this);
+    },
+    /**
+     * @description To get the generation of the element.
+     * @returns {Element} Self.
+     */
+    generation: function () {
+        return this.parentNode.children;
+    },
+    /**
+     * @description To get the previous element.
+     * @returns {Element|null} Previous element if exists, null otherwise.
+     */
+    prev: function () {
+        var c = this.parentNode.children,
+            i = Array.from(c).indexOf(this);
+        return i === 0 ? null : c[i - 1];
+    },
+    /**
+     * @description To get the next element.
+     * @returns {Element|null} Next element if exists, null otherwise.
+     */
+    next: function () {
+        var c = this.parentNode.children,
+            i = Array.from(c).indexOf(this);
+        return i === c.length - 1 ? null : c[i + 1];
+    },
+    /**
+     * @description To set the scroll offset of the element.
+     * @param {number} offsetX The offset x.
+     * @param {number|undefined} offsetY The offset y. Will set to offsetX if the value is not given.
+     * @returns {Element} Self.
+     */
+    scroll: function (offsetX, offsetY) {
+        if (offsetY === undefined) {
+            offsetY = offsetX;
+        }
+        this.scrollLeft += offsetX;
+        this.scrollTop += offsetY;
+        return this;
+    },
+    /**
+     * @description To insert to the children of another element.
+     * @param {number} index The index.
+     * @param {Element} parent The parent element.
+     * @returns {Element} Self.
+     */
+    insertTo: function (index, parent) {
+        parent.insertBefore(this, parent.children[index]);
+        return this;
+    },
+    /**
+     * @description To insert an element to the children of the element.
+     * @param {number} index The index.
+     * @param {Element} child The child element.
+     * @returns {Element} Self.
+     */
+    insertChild: function (index, child) {
+        this.insertBefore(child, this.children[index]);
+        return this;
+    },
+    /**
+     * @description To tell whether the element can/will be seen.
+     * @param {number} gap The gap between the bounding client rect of the element and the view. (default value is 0.)
+     * @returns {Element} Self.
+     */
+    isSeen: function (gap) {
+        if (typeof gap !== 'number') {
+            gap = 0;
+        }
+        var scrollTop = Math.max(document.documentElement.scrollTop, document.body.scrollTop),
+            scrollLeft = Math.max(document.documentElement.scrollLeft, document.body.scrollLeft),
+            eleTop = this.offsetTop,
+            eleLeft = this.offsetLeft;
+        return scrollTop + window.innerHeight + gap >= eleTop &&
+            scrollTop <= eleTop + this.getBoundingClientRect().height + gap &&
+            scrollLeft + window.innerWidth + gap >= eleLeft &&
+            scrollLeft <= eleLeft + this.getBoundingClientRect().width + gap;
+    },
+    /**
+     * @description To set/get the value of the element.
+     * @param {string|undefined} val The value to set.
+     * @returns {string|Element} Self if the value is given, the value of the element otherwise.
+     */
+    val: function (val) {
+        if (arguments.length === 0) {
+            return this.value;
+        }
+        this.value = '' + val;
+        DOM.trigger(this, 'input');
+        return this;
+    },
+    /**
+     * @description To create an animation of the element. (Will start the animation immediately.)
+     * @param {{style: string, unit: string}} config The config. (For more properties, see Ani.Transition)
+     * @returns {Ani.Transition} The animation.
+     */
+    ani: function (config) {
+        var ele = this,
+            tran = new Ani.Transition(config);
+        tran.agency.listen('update', function (val) {
+            ele.style[config.style] = val + config.unit || 'px';
+        });
+        return tran;
+    },
+    /**
+     * @description To let the element fade out.
+     * @param {{dur: number, fps: number, fn: (at: number) => number}} config The config.
+     * @returns {Element} Self.
+     */
+    fadeOut: function (config) {
+        var ele = this;
+        config = config || {};
+        return this.ani({
+            style: 'opacity',
+            from: config.from || 1,
+            to: 0,
+            unit: '',
+            fps: config.fps || 32,
+            dur: config.dur || 1000,
+            fn: config.fn
+        }).listen('stop', function () {
+            ele.css('opacity', 0);
+            ele.hide();
+        });
+    },
+    /**
+     * @description To let the element fade in.
+     * @param {{dur: number, fps: number, display: string, fn: (at: number) => number}} config The config.
+     * @returns {Element} Self.
+     */
+    fadeIn: function (config) {
+        var ele = this;
+        config = config || {};
+        ele.show(config.display || 'block');
+        return this.ani({
+            style: 'opacity',
+            from: config.from || 0,
+            to: 1,
+            unit: '',
+            fps: config.fps || 32,
+            dur: config.dur || 1000,
+            fn: config.fn
+        }).listen('stop', function () {
+            ele.css('opacity', 1);
+        });
     }
-};
-/**
- * @description To hide the element.
- * @returns {Element} Self.
- */
-Element.prototype.hide = function () {
-    return this.css('display', 'none');
-};
-/**
- * @description To display the Element.
- * @param {string} display The value of the css attribute 'display' of the element.
- * @returns {Element} Self.
- */
-Element.prototype.show = function (display) {
-    display = display || 'block';
-    return this.css('display', display);
-};
-/**
- * @description To remove the element.
- * @returns {Element} Self.
- */
-Element.prototype.remove = function () {
-    return this.parentNode.removeChild(this);
-};
-/**
- * @description To get the generation of the element.
- * @returns {Element} Self.
- */
-Element.prototype.generation = function () {
-    return this.parentNode.children;
-};
-/**
- * @description To get the previous element.
- * @returns {Element|null} Previous element if exists, null otherwise.
- */
-Element.prototype.prev = function () {
-    var c = this.parentNode.children,
-        i = Array.from(c).indexOf(this);
-    return i === 0 ? null : c[i - 1];
-};
-/**
- * @description To get the next element.
- * @returns {Element|null} Next element if exists, null otherwise.
- */
-Element.prototype.next = function () {
-    var c = this.parentNode.children,
-        i = Array.from(c).indexOf(this);
-    return i === c.length - 1 ? null : c[i + 1];
-};
-/**
- * @description To set the scroll offset of the element.
- * @param {number} offsetX The offset x.
- * @param {number|undefined} offsetY The offset y. Will set to offsetX if the value is not given.
- * @returns {Element} Self.
- */
-Element.prototype.scroll = function (offsetX, offsetY) {
-    if (offsetY === undefined) {
-        offsetY = offsetX;
-    }
-    this.scrollLeft += offsetX;
-    this.scrollTop += offsetY;
-    return this;
-};
-/**
- * @description To insert to the children of another element.
- * @param {number} index The index.
- * @param {Element} parent The parent element.
- * @returns {Element} Self.
- */
-Element.prototype.insertTo = function (index, parent) {
-    parent.insertBefore(this, parent.children[index]);
-    return this;
-};
-/**
- * @description To insert an element to the children of the element.
- * @param {number} index The index.
- * @param {Element} child The child element.
- * @returns {Element} Self.
- */
-Element.prototype.insertChild = function (index, child) {
-    this.insertBefore(child, this.children[index]);
-    return this;
-};
-/**
- * @description To tell whether the element can/will be seen.
- * @param {number} gap The gap between the bounding client rect of the element and the view. (default value is 0.)
- * @returns {Element} Self.
- */
-Element.prototype.isSeen = function (gap) {
-    if (typeof gap !== 'number') {
-        gap = 0;
-    }
-    var scrollTop = Math.max(document.documentElement.scrollTop, document.body.scrollTop),
-        scrollLeft = Math.max(document.documentElement.scrollLeft, document.body.scrollLeft),
-        eleTop = this.offsetTop,
-        eleLeft = this.offsetLeft;
-    return scrollTop + window.innerHeight + gap >= eleTop &&
-        scrollTop <= eleTop + this.getBoundingClientRect().height + gap &&
-        scrollLeft + window.innerWidth + gap >= eleLeft &&
-        scrollLeft <= eleLeft + this.getBoundingClientRect().width + gap;
-};
-/**
- * @description To set/get the value of the element.
- * @param {string|undefined} val The value to set.
- * @returns {string|Element} Self if the value is given, the value of the element otherwise.
- */
-Element.prototype.val = function (val) {
-    if (arguments.length === 0) {
-        return this.value;
-    }
-    this.value = '' + val;
-    DOM.trigger(this, 'input');
-    return this;
-};
-/**
- * @description To create an animation of the element. (Will start the animation immediately.)
- * @param {{style: string, unit: string}} config The config. (For more properties, see Ani.Transition)
- * @returns {Ani.Transition} The animation.
- */
-Element.prototype.ani = function (config) {
-    var ele = this,
-        tran = new Ani.Transition(config);
-    tran.agency.listen('update', function (val) {
-        ele.style[config.style] = val + config.unit || 'px';
-    });
-    return tran;
-};
-/**
- * @description To let the element fade out.
- * @param {{dur: number, fps: number, fn: (at: number) => number}} config The config.
- * @returns {Element} Self.
- */
-Element.prototype.fadeOut = function (config) {
-    var ele = this;
-    config = config || {};
-    return this.ani({
-        style: 'opacity',
-        from: config.from || 1,
-        to: 0,
-        unit: '',
-        fps: config.fps || 32,
-        dur: config.dur || 1000,
-        fn: config.fn
-    }).listen('stop', function () {
-        ele.css('opacity', 0);
-        ele.hide();
-    });
-};
-/**
- * @description To let the element fade in.
- * @param {{dur: number, fps: number, display: string, fn: (at: number) => number}} config The config.
- * @returns {Element} Self.
- */
-Element.prototype.fadeIn = function (config) {
-    var ele = this;
-    config = config || {};
-    ele.show(config.display || 'block');
-    return this.ani({
-        style: 'opacity',
-        from: config.from || 0,
-        to: 1,
-        unit: '',
-        fps: config.fps || 32,
-        dur: config.dur || 1000,
-        fn: config.fn
-    }).listen('stop', function () {
-        ele.css('opacity', 1);
-    });
-};
-
-//#endregion
+}, function (v, k) {
+    Element.prototype[k] = v;
+});
 
 // extend elements, documents and windows.
 Loop.each([
@@ -2274,7 +2297,9 @@ var Extension = (function () {
                             requirements[i] = exportations[need[i]];
                         }
                     }
-                    setImmediate.apply(window, [callback].concat(requirements));
+                    setImmediate(function () {
+                        callback.apply(null, requirements);
+                    });
                     return true;
                 });
                 return false;
