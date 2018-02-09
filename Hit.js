@@ -1280,7 +1280,7 @@ var DOM = {
                 x, y;
             ele.listen('touchstart', function (e) {
                 id = setTimeout(function () {
-                    listener(e);
+                    listener(e, x, y);
                 }, DOM.CustomEvents.HOLD_TIME_LIMIT);
                 x = e.changedTouches[0].clientX;
                 y = e.changedTouches[0].clientY;

@@ -128,6 +128,8 @@ In the folder `ext`, you will find various extensions, and They export(using `Ex
     - Game
 - ext\LocalStore\Hit.LocalStore.js
     - LocalStore
+- ext\Menu\Hit.Menu.js
+    - Menu
 - ext\msgBox\Hit.msgBox.js
     - msgBox
 - ext\range-input\Hit.range-input.js
