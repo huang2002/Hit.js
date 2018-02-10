@@ -1,6 +1,6 @@
 # Hit.js
 
-> A simple javascript lib.
+> A javascript lib.
 
 ## What's Hit.js?
 
@@ -98,6 +98,9 @@ It is a javascript lib which not only defines some useful methods and constructo
 - Array.prototype.
     - randEle
     - replaceWith
+    - delIndex
+    - split
+    - at
 - Array
     - range
 - Math.
@@ -114,7 +117,7 @@ It is a javascript lib which not only defines some useful methods and constructo
 
 ## Extensions
 
-In the folder `ext`, you will find various extensions, and They export(using `Extension.*`) different things. You can read the comments in each file to learn what they exported, and use `Extension.*` to employ them.
+In the folder `ext`, you will find various extensions, and They export (using `Extension.*`) different things. You can read the comments in each file to learn what they exported, and use `Extension.*` to employ them.
 
 ### Some extensions:
 
@@ -140,4 +143,4 @@ In the folder `ext`, you will find various extensions, and They export(using `Ex
     - World
 - ext\top\Hit.top.js
 
-## Try it :)
+## :)
