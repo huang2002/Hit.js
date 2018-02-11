@@ -762,13 +762,13 @@ Extension.define('World', [], function () {
                     if (curA > maxA) {
                         a.scale(maxA / curA);
                     }
-                    v.addVec(a);
+                    v.addVec(a.clone().scale(ratio));
                     var curV = v.getLen(),
                         maxV = this.maxV;
                     if (curV > maxV) {
                         v.scale(maxV / curV);
                     }
-                    this.pos.addVec(v.clone().scale(ratio));
+                    this.pos.addVec(v);
                     if (curV > 0) {
                         v.scale(1 - this.resistance);
                     }
