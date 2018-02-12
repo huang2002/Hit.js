@@ -567,6 +567,23 @@ Loop.each({
             }
             return instance;
         };
+    },
+    /** 
+     * @description To set the calling limit of the function.
+     * @param {number} limit The calling limit.
+     * @param {any} thisArg The this arg.
+     * @returns {Function} The modified function.
+     */
+    limit: function (limit, thisArg) {
+        var cb = this,
+            lastCallTime;
+        return function () {
+            var now = +new Date();
+            if (!lastCallTime || now - lastCallTime >= limit) {
+                lastCallTime = now;
+                cb.apply(thisArg, arguments);
+            }
+        };
     }
 }, function (v, k) {
     Object.defineProperty(Function.prototype, k, {
@@ -989,7 +1006,7 @@ var Agency = new Constructor(
             if (!(args instanceof Object && 'length' in args)) {
                 args = [args];
             }
-            if (!(type in this._listeners)) {
+            if (!(type in this._listeners && this._listeners[type].length)) {
                 if (this.cache) {
                     if (!(type in this._caches)) {
                         this._caches[type] = [];

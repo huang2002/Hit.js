@@ -95,6 +95,7 @@ It is a javascript lib which not only defines some useful methods and constructo
     - after
     - before
     - single
+    - limit
 - Array.prototype.
     - randEle
     - replaceWith
@@ -141,6 +142,7 @@ In the folder `ext`, you will find various extensions, and They export (using `E
     - Sequence
 - ext\World\Hit.World.js
     - World
+- ext\tab\Hit.tab.js
 - ext\top\Hit.top.js
 
 ## :)
