@@ -1,5 +1,5 @@
 /**
- * @file Hit.Tab.js
+ * @file Hit.tab.js
  * @see https://github.com/huang2002/Hit.js
  * @author hhh
  * @overview This file defined something to help you create tabs that are bound with views easily.
