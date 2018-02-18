@@ -298,6 +298,7 @@ Extension.define('Game', [
                         config.method = Game.FIXED;
                     }
                     var canvas = this._canvas,
+                        body = document.body,
                         ratio = window.devicePixelRatio || 1;
                     var justify = function () {
                         var ans = config.method(this.UI);
@@ -308,13 +309,19 @@ Extension.define('Game', [
                         canvas.css('width', ans.width + 'px');
                         canvas.css('height', ans.height + 'px');
                         this.context.scale(ratio, ratio);
+                        if ('screen' in window) {
+                            var screen = window.screen;
+                            if (screen.height) {
+                                body.style.height = screen.height + 'px';
+                            }
+                        }
                     }.bind(this);
                     justify();
                     if (config.autoResize !== false) {
                         window.listen('resize', justify);
                         window.listen('orientationchange', justify);
                     }
-                    document.body.appendChild(canvas)
+                    body.appendChild(canvas);
                 } catch (err) {
                     console.error(err);
                     return false;
