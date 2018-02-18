@@ -315,7 +315,7 @@ Extension.define('Game', [
                                 body.style.height = screen.height + 'px';
                             }
                         }
-                    }.bind(this);
+                    }.bind(this).limit(500);
                     justify();
                     if (config.autoResize !== false) {
                         window.listen('resize', justify);
