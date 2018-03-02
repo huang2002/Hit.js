@@ -1703,7 +1703,7 @@ Loop.each({
      * @returns {Element} Self.
      */
     disable: function (disabled) {
-        this.disabled = disabled === undefined ? disabled : !this.disabled;
+        this.disabled = disabled !== undefined ? disabled : !this.disabled;
         return this;
     },
     /**
